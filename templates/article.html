@@ -53,8 +53,13 @@
                             <p>KNN Similarity: {{ rec.recommendation_similarity }}%</p>
                             <p>LLM rating: {{ rec.recommendation_llm_rating }}/10</p>
                             <p class="recommendation-explanation" style="font-size: 15px;">{{ rec.recommendation_explanation }}</p>
+                            <div class="feedback-buttons">
+                                <button class="like-button" data-article-id="{{ article.uuid }}" data-rec-id="{{ rec.uuid }}">Relevant</button>
+                                <button class="dislike-button" data-article-id="{{ article.uuid }}" data-rec-id="{{ rec.uuid }}">Not relevant</button>
+                            </div>
                         </div>
                     </a>
+                </li>
                 {% else %}
                 <li>No recommendations available for this article.</li>
                 {% endfor %}
@@ -90,6 +95,93 @@
 
         <a href="{{ url_for('home') }}" class="back-link">Back to Home</a>
     </div>
-</body>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Store feedback state
+            const feedbackState = {};
+
+            // Attach event listeners to like buttons
+            const likeButtons = document.querySelectorAll('.like-button');
+            likeButtons.forEach(function(button) {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const articleId = this.getAttribute('data-article-id');
+                    const recId = this.getAttribute('data-rec-id');
+                    toggleFeedback(this, articleId, recId, 'like');
+                });
+            });
+
+            // Attach event listeners to dislike buttons
+            const dislikeButtons = document.querySelectorAll('.dislike-button');
+            dislikeButtons.forEach(function(button) {
+                button.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const articleId = this.getAttribute('data-article-id');
+                    const recId = this.getAttribute('data-rec-id');
+                    toggleFeedback(this, articleId, recId, 'dislike');
+                });
+            });
+
+            // Function to toggle feedback
+            function toggleFeedback(button, articleId, recommendationId, feedbackType) {
+                // Determine the opposite feedback type
+                const oppositeType = feedbackType === 'like' ? 'dislike' : 'like';
+
+                // Update feedback state
+                if (feedbackState[recommendationId] === feedbackType) {
+                    // User is undoing their feedback
+                    feedbackState[recommendationId] = null;
+                    sendFeedback(articleId, recommendationId, 'neutral');
+                    updateButtonStyles(recommendationId, null);
+                } else {
+                    // User is providing new feedback
+                    feedbackState[recommendationId] = feedbackType;
+                    sendFeedback(articleId, recommendationId, feedbackType);
+                    updateButtonStyles(recommendationId, feedbackType);
+                }
+            }
+
+            // Function to send feedback to backend
+            function sendFeedback(articleId, recommendationId, feedbackType) {
+                fetch('{{ url_for('feedback') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        'article_id': articleId,
+                        'recommendation_id': recommendationId,
+                        'feedback': feedbackType
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Feedback submitted:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+            }
+
+            // Function to update button styles based on feedback state
+            function updateButtonStyles(recommendationId, feedbackType) {
+                const likeButton = document.querySelector(`.like-button[data-rec-id="${recommendationId}"]`);
+                const dislikeButton = document.querySelector(`.dislike-button[data-rec-id="${recommendationId}"]`);
+
+                // Reset styles
+                likeButton.classList.remove('active');
+                dislikeButton.classList.remove('active');
+
+                // Apply active class to the selected feedback
+                if (feedbackType === 'like') {
+                    likeButton.classList.add('active');
+                } else if (feedbackType === 'dislike') {
+                    dislikeButton.classList.add('active');
+                }
+            }
+        });
+    </script>
+
+</body>
 </html>

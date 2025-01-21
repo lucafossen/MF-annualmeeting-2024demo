@@ -259,3 +259,28 @@ body {
     color: inherit;
     /* or specify a color like #000 for black */
 }
+
+/* Feedback Buttons */
+.feedback-buttons {
+    margin-top: 10px;
+}
+
+.like-button,
+.dislike-button {
+    padding: 8px 12px;
+    margin-right: 5px;
+    border: none;
+    background-color: #e0e0e0;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.like-button.active {
+    background-color: #5cb85c; /* Green for like */
+    color: white;
+}
+
+.dislike-button.active {
+    background-color: #d9534f; /* Red for dislike */
+    color: white;
+}

@@ -1,6 +1,9 @@
 import pandas as pd
 import ast
 from scrape import get_image_src
+import json
+import os
+from datetime import datetime
 
 class Article:
 
@@ -92,6 +95,14 @@ class ArticleRecommendationFacade:
         # Optional caches for efficiency
         self.article_cache = {}
         self.recommendation_cache = {}
+
+        self.feedback_file = 'data/feedback.json'
+        # Load existing feedback
+        if os.path.exists(self.feedback_file):
+            with open(self.feedback_file, 'r') as f:
+                self.feedback_data = json.load(f)
+        else:
+            self.feedback_data = {}
 
     def get_article(self, article_id: str):
         """Retrieve article details by ID."""
@@ -200,5 +211,57 @@ class ArticleRecommendationFacade:
 
         self.recommendation_cache[article_id] = results # Cache
         return results
+
+    def save_feedback(self, article_id, recommendation_id, feedback_type, session_id):
+        # Ensure feedback_data is a dictionary
+        if not isinstance(self.feedback_data, dict):
+            self.feedback_data = {}
+
+        # Get the feedback data for this session_id
+        session_feedback = self.feedback_data.get(session_id, {})
+
+        # Get the feedback list for this article_id within the session
+        article_feedback = session_feedback.get(article_id, [])
+
+        # Check if feedback for this recommendation already exists
+        existing_feedback = next(
+            (item for item in article_feedback if item['recommendation_id'] == recommendation_id),
+            None
+        )
+
+        if feedback_type == 'neutral':
+            # Remove existing feedback if user undoes their choice
+            if existing_feedback:
+                article_feedback.remove(existing_feedback)
+        else:
+            if existing_feedback:
+                # Update the existing feedback
+                existing_feedback['feedback_type'] = feedback_type
+                existing_feedback['timestamp'] = datetime.now().isoformat()
+            else:
+                # Append new feedback to the list
+                article_feedback.append({
+                    'recommendation_id': recommendation_id,
+                    'feedback_type': feedback_type,
+                    'timestamp': datetime.now().isoformat()
+                })
+
+        # Update the session's feedback data for this article_id
+        if article_feedback:
+            session_feedback[article_id] = article_feedback
+        else:
+            # Remove the article_id if no feedback remains
+            session_feedback.pop(article_id, None)
+
+        # Update the feedback data for this session_id
+        if session_feedback:
+            self.feedback_data[session_id] = session_feedback
+        else:
+            # Remove the session_id if no feedback remains
+            self.feedback_data.pop(session_id, None)
+
+        # Save to file
+        with open(self.feedback_file, 'w') as f:
+            json.dump(self.feedback_data, f, indent=4)
 
     #TODO: Add recommendations_results to the html (perhaps nothing need to be done in this file?)

@@ -1,10 +1,17 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify, session
 from utils import ArticleRecommendationFacade
+import uuid
 
 # Initialize the facade with the provided paths
 facade = ArticleRecommendationFacade('data/combined_articles_recommendations.csv', 'data/articles_big_dataset.csv')
 
 app = Flask(__name__)
+app.secret_key = 'secretsecret123654'
+
+@app.before_request
+def assign_session_id():
+    if 'session_id' not in session:
+        session['session_id'] = str(uuid.uuid4())
 
 @app.route('/')
 def home():
@@ -36,6 +43,19 @@ def recommendation(article_id, recommendation_id):
     recommendation = next((rec for rec in recommendations if rec.uuid == recommendation_id), None)
 
     return render_template('recommendation.html', article=article, recommendation=recommendation)
+
+@app.route('/feedback', methods=['POST'])
+def feedback():
+    data = request.get_json()
+    article_id = data.get('article_id')
+    recommendation_id = data.get('recommendation_id')
+    feedback_type = data.get('feedback')
+    session_id = session.get('session_id')
+
+    # Save feedback to the backend
+    facade.save_feedback(article_id, recommendation_id, feedback_type, session_id)
+
+    return jsonify({'status': 'success'}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
