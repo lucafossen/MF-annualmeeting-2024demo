@@ -1,12 +1,26 @@
 from flask import Flask, render_template, request, jsonify, session
-from utils import ArticleRecommendationFacade
+from utils import ArticleRecommendationFacade, dump_db_jsonl
 import uuid
+from db import mongo
+from bson.objectid import ObjectId
+from dotenv import load_dotenv
+import os
+from datetime import datetime, timezone
+
+app = Flask(__name__)
 
 # Initialize the facade with the provided paths
 facade = ArticleRecommendationFacade('data/combined_articles_recommendations.csv', 'data/articles_big_dataset.csv')
 
-app = Flask(__name__)
-app.secret_key = 'secretsecret123654'
+
+load_dotenv()
+app.secret_key = os.getenv('EXPERT_STUDY_SECRET_KEY')
+
+# MongoDB configuration
+app.config["MONGO_URI"] = os.getenv('MONGODB_URI')
+
+# Initialize PyMongo
+mongo.init_app(app)
 
 @app.before_request
 def assign_session_id():
@@ -28,8 +42,7 @@ def article_recommendations(article_id):
     related_articles = set(result.cleaned_related_articles)
     recommended_articles = set(rec.uuid for rec in recommendations)
     missed_article_ids = related_articles - recommended_articles
-    missed_articles = [facade.get_article(article_id) for article_id in missed_article_ids]
-    # print(f'Missed articles: {missed_articles}')
+    missed_articles = [facade.get_article(aid) for aid in missed_article_ids]
 
     return render_template('article.html', article=result, recommendations=recommendations, missed_articles=missed_articles)
 
@@ -52,8 +65,18 @@ def feedback():
     feedback_type = data.get('feedback')
     session_id = session.get('session_id')
 
-    # Save feedback to the backend
-    facade.save_feedback(article_id, recommendation_id, feedback_type, session_id)
+    # Create a feedback document
+    feedback_doc = {
+        "session_id": session_id,
+        "article_id": article_id,
+        "recommendation_id": recommendation_id,
+        "feedback_type": feedback_type,
+        "timestamp": datetime.now(timezone.utc).timestamp()
+    }
+    # Insert the feedback document into the "feedback" collection
+    mongo.db.feedback.insert_one(feedback_doc)
+
+    # dump_db_jsonl()
 
     return jsonify({'status': 'success'}), 200
 
