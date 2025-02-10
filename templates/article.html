@@ -76,8 +76,6 @@
             </div>
         </div>
 
-
-
         <!-- Wrap the main content in a container to control coloring -->
         <div id="main-content">
             <div class="small-articles-section">
@@ -93,9 +91,6 @@
                                     {{ rec.title }}
                                 </span>
                                 <p class="recommendation-description">{{ rec.byline | join(', ') }}<br>{{ rec.creation_date }}</p>
-                                <p>KNN Similarity: {{ rec.recommendation_similarity }}%</p>
-                                <p>LLM rating: {{ rec.recommendation_llm_rating }}/10</p>
-                                <p class="recommendation-explanation" style="font-size: 15px;">{{ rec.recommendation_explanation }}</p>
                                 <div class="feedback-buttons">
                                     <button class="like-button" data-article-id="{{ article.uuid }}" data-rec-id="{{ rec.uuid }}">Relevant</button>
                                     <button class="dislike-button" data-article-id="{{ article.uuid }}" data-rec-id="{{ rec.uuid }}">Not relevant</button>
@@ -122,11 +117,7 @@
                                 <span class="recommendation-title">
                                     {{ missed.title }}
                                 </span>
-                                <p class="recommendation-description">{{ missed.byline | join(', ')
-                                    }}<br>{{missed.creation_date}}</p>
-                                <!-- <p>KNN Similarity: {{ missed.recommendation_similarity }}%</p> -->
-                                <!-- <p>LLM rating: {{ missed.recommendation_llm_rating }}/10</p> -->
-                                <!-- <p class="recommendation-explanation" style="font-size: 15px;">{{ missed.recommendation_explanation }}</p> -->
+                                <p class="recommendation-description">{{ missed.byline | join(', ') }}<br>{{ missed.creation_date }}</p>
                             </div>
                         </a>
                     </li>
