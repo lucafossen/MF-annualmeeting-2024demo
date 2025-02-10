@@ -104,37 +104,8 @@
                 </ul>
             </div>
 
-            <div class="small-articles-section missed-articles-section">
-                <h2>Missed Articles</h2>
-                <p><i>Articles that were marked as related by editors but not recommended by the AI</i></p>
-                <ul class="small-articles">
-                    {% for missed in missed_articles %}
-                    <li class="recommendation-item missed-item">
-                        <a href="https://tv2.no/a/{{ missed.uuid }}"
-                            style="display: block; height: 100%; text-decoration: none;">
-                            <img src="{{ missed.image_url or 'https://via.placeholder.com/150' }}" alt="No image">
-                            <div class="recommendation-content">
-                                <span class="recommendation-title">
-                                    {{ missed.title }}
-                                </span>
-                                <p class="recommendation-description">{{ missed.byline | join(', ') }}<br>{{ missed.creation_date }}</p>
-                            </div>
-                        </a>
-                    </li>
-                    {% else %}
-                    <li>No missed articles for this article.</li>
-                    {% endfor %}
-                </ul>
-            </div>
         </div>
         <a href="{{ url_for('home') }}" class="back-link">Back to Home</a>
-        <!-- Add the toggle button here -->
-        <div class="toggle-container">
-            <label for="toggle-visibility" class="toggle-label">
-                <input type="checkbox" id="toggle-visibility" checked>
-                <span class="toggle-button">Show original editor selection</span>
-            </label>
-        </div>
     </div>
 
     <script>
@@ -221,39 +192,6 @@
                     dislikeButton.classList.add('active');
                 }
             }
-
-            // Reference to the toggle checkbox
-            const toggleVisibility = document.getElementById('toggle-visibility');
-            const mainContent = document.getElementById('main-content');
-            const colorExplainer = document.getElementById('color-explainer');
-            const missedArticlesSection = document.querySelector('.missed-articles-section');
-
-            // Function to update visibility based on toggle state
-            function updateVisibility() {
-                if (toggleVisibility.checked) {
-                    // Hide coloring
-                    mainContent.classList.add('no-coloring');
-                    // Hide missed articles section
-                    missedArticlesSection.classList.add('hidden');
-                    // Hide color explainer
-                    colorExplainer.style.display = 'none';
-                } else {
-                    // Show coloring
-                    mainContent.classList.remove('no-coloring');
-                    // Show missed articles section
-                    missedArticlesSection.classList.remove('hidden');
-                    // Show color explainer
-                    colorExplainer.style.display = 'block';
-                }
-            }
-
-            // Initialize visibility on page load
-            updateVisibility();
-
-            // Add event listener for toggle changes
-            toggleVisibility.addEventListener('change', function () {
-                updateVisibility();
-            });
         });
     </script>
 
