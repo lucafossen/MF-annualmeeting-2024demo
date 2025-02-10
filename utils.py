@@ -3,6 +3,7 @@ import ast
 from scrape import get_image_src
 import json
 import os
+from db import mongo
 from datetime import datetime
 
 class Article:
@@ -264,4 +265,21 @@ class ArticleRecommendationFacade:
         with open(self.feedback_file, 'w') as f:
             json.dump(self.feedback_data, f, indent=4)
 
-    #TODO: Add recommendations_results to the html (perhaps nothing need to be done in this file?)
+def dump_db_jsonl():
+    """
+    Dumps all user feedback to a JSON Lines (JSONL) file.
+    """
+    os.makedirs('db_dump', exist_ok=True)
+
+    # Query all user preferences
+    user_preferences = mongo.db.feedback.find()
+
+    # Define the file path with a timestamp
+    file_path = f'db_dump/dump_{pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")}.jsonl'
+
+    # Write each feedback as a separate JSON line
+    with open(file_path, 'w') as jsonl_file:
+        for user_pref in user_preferences:
+            # Remove the ObjectId as it is not JSON serializable by default
+            user_pref['_id'] = str(user_pref['_id'])
+            jsonl_file.write(json.dumps(user_pref) + '\n')
