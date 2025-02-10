@@ -11,25 +11,21 @@
     <div class="container">
         <div class="header">
             <a href="/" class="no-underline-link">
-
                 <img src="https://mediafutures.no/wp-content/uploads/tv2_scaled.png" alt="TV 2 Logo" class="tv2-logo">
-
                 <h1>LLMs as Journalists</h1>
                 <p>Tool for journalists and editors - Helping them find related articles to their story</p>
             </a>
         </div>
         <a href="{{ url_for('article_recommendations', article_id=article['uuid']) }}"
             class="back-to-article-button">Back to main article</a>
-        <h2>Recommendation explanation:</h2>
-        <p class="recommendation-explanation">{{ recommendation.recommendation_explanation }}</p>
-
         <div class="main-article-item">
             <a href="https://tv2.no/a/{{ recommendation.uuid }}" class="external-link-button">Visit original article</a>
             <div class="main-article-content">
                 <h1 class="main-article-title">{{ recommendation.title }}</h1>
                 <p class="article-byline">{{ recommendation.byline | join(', ') }}</p>
-                <p class="article-metadata">Published on {{ recommendation.creation_date }} in {{ recommendation.section
-                    }}</p>
+                <p class="article-metadata">
+                    Published on {{ recommendation.creation_date }} in {{ recommendation.section }}
+                </p>
                 <img src="{{ recommendation.image_url or 'https://via.placeholder.com/150' }}"
                     alt="{{ recommendation.title }}">
                 <p class="article-lead-text">{{ recommendation.lead_text }}</p>
