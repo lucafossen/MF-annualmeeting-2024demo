@@ -213,58 +213,6 @@ class ArticleRecommendationFacade:
         self.recommendation_cache[article_id] = results # Cache
         return results
 
-    def save_feedback(self, article_id, recommendation_id, feedback_type, session_id):
-        # Ensure feedback_data is a dictionary
-        if not isinstance(self.feedback_data, dict):
-            self.feedback_data = {}
-
-        # Get the feedback data for this session_id
-        session_feedback = self.feedback_data.get(session_id, {})
-
-        # Get the feedback list for this article_id within the session
-        article_feedback = session_feedback.get(article_id, [])
-
-        # Check if feedback for this recommendation already exists
-        existing_feedback = next(
-            (item for item in article_feedback if item['recommendation_id'] == recommendation_id),
-            None
-        )
-
-        if feedback_type == 'neutral':
-            # Remove existing feedback if user undoes their choice
-            if existing_feedback:
-                article_feedback.remove(existing_feedback)
-        else:
-            if existing_feedback:
-                # Update the existing feedback
-                existing_feedback['feedback_type'] = feedback_type
-                existing_feedback['timestamp'] = datetime.now().isoformat()
-            else:
-                # Append new feedback to the list
-                article_feedback.append({
-                    'recommendation_id': recommendation_id,
-                    'feedback_type': feedback_type,
-                    'timestamp': datetime.now().isoformat()
-                })
-
-        # Update the session's feedback data for this article_id
-        if article_feedback:
-            session_feedback[article_id] = article_feedback
-        else:
-            # Remove the article_id if no feedback remains
-            session_feedback.pop(article_id, None)
-
-        # Update the feedback data for this session_id
-        if session_feedback:
-            self.feedback_data[session_id] = session_feedback
-        else:
-            # Remove the session_id if no feedback remains
-            self.feedback_data.pop(session_id, None)
-
-        # Save to file
-        with open(self.feedback_file, 'w') as f:
-            json.dump(self.feedback_data, f, indent=4)
-
 def dump_db_jsonl():
     """
     Dumps all user feedback to a JSON Lines (JSONL) file.
