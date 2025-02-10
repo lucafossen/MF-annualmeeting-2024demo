@@ -62,7 +62,8 @@ def feedback():
     data = request.get_json()
     article_id = data.get('article_id')
     recommendation_id = data.get('recommendation_id')
-    feedback_type = data.get('feedback')
+    rating = data.get('rating')          # New field
+    comment = data.get('comment', '')    # New field
     session_id = session.get('session_id')
 
     # Create a feedback document
@@ -70,13 +71,15 @@ def feedback():
         "session_id": session_id,
         "article_id": article_id,
         "recommendation_id": recommendation_id,
-        "feedback_type": feedback_type,
+        "rating": rating,           # Store the numeric rating
+        "comment": comment,         # Store the comment text
         "timestamp": datetime.now(timezone.utc).timestamp()
     }
+
     # Insert the feedback document into the "feedback" collection
     mongo.db.feedback.insert_one(feedback_doc)
 
-    # dump_db_jsonl()
+    dump_db_jsonl()
 
     return jsonify({'status': 'success'}), 200
 

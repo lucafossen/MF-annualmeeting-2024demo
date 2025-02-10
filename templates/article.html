@@ -84,20 +84,45 @@
                 <ul class="small-articles">
                     {% for rec in recommendations %}
                     <li class="recommendation-item {% if rec.uuid in article.related_articles %}highlighted-recommendation{% else %}normal-recommendation{% endif %}">
-                        <a href="{{ url_for('recommendation', article_id=article.uuid, recommendation_id=rec.uuid) }}" style="display: block; height: 100%; text-decoration: none;">
+                        <a href="{{ url_for('recommendation', article_id=article.uuid, recommendation_id=rec.uuid) }}">
                             <img src="{{ rec.image_url or 'https://via.placeholder.com/150' }}" alt="No image">
                             <div class="recommendation-content">
-                                <span class="recommendation-title">
-                                    {{ rec.title }}
-                                </span>
+                                <span class="recommendation-title">{{ rec.title }}</span>
                                 <p class="recommendation-description">{{ rec.byline | join(', ') }}<br>{{ rec.creation_date }}</p>
-                                <div class="feedback-buttons">
-                                    <button class="like-button" data-article-id="{{ article.uuid }}" data-rec-id="{{ rec.uuid }}">Relevant</button>
-                                    <button class="dislike-button" data-article-id="{{ article.uuid }}" data-rec-id="{{ rec.uuid }}">Not relevant</button>
-                                </div>
                             </div>
-                        </a>
-                    </li>
+                            </a>
+
+                            <div class="feedback-section">
+                            <label for="rating-{{ rec.uuid }}">Rate (1–10):</label>
+                            <select class="rating-input" id="rating-{{ rec.uuid }}" data-article-id="{{ article.uuid }}" data-rec-id="{{ rec.uuid }}">
+                                <option value="">-- Select --</option>
+                                {% for i in range(1, 11) %}
+                                <option value="{{ i }}">{{ i }}</option>
+                                {% endfor %}
+                            </select>
+
+
+                            <br>
+                            <br>
+
+                            <label for="feedback-comment-{{ rec.uuid }}">Comment:</label>
+                            <textarea
+                                class="feedback-comment"
+                                id="feedback-comment-{{ rec.uuid }}"
+                                data-article-id="{{ article.uuid }}"
+                                data-rec-id="{{ rec.uuid }}"
+                                placeholder="Your thoughts..."
+                            ></textarea>
+
+                            <button
+                                class="submit-feedback"
+                                data-article-id="{{ article.uuid }}"
+                                data-rec-id="{{ rec.uuid }}"
+                            >
+                                Submit
+                            </button>
+                            </div>
+                        </li>
                     {% else %}
                     <li>No recommendations available for this article.</li>
                     {% endfor %}
@@ -109,53 +134,39 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Store feedback state
-            const feedbackState = {};
-
-            // Attach event listeners to like buttons
-            const likeButtons = document.querySelectorAll('.like-button');
-            likeButtons.forEach(function(button) {
-                button.addEventListener('click', function(event) {
+        document.addEventListener('DOMContentLoaded', function () {
+            // Attach event listeners to the new "Submit" buttons
+            const feedbackButtons = document.querySelectorAll('.submit-feedback');
+            feedbackButtons.forEach(function (button) {
+                button.addEventListener('click', function (event) {
                     event.preventDefault();
                     const articleId = this.getAttribute('data-article-id');
                     const recId = this.getAttribute('data-rec-id');
-                    toggleFeedback(this, articleId, recId, 'like');
+
+                    // Retrieve the rating and text from their respective elements
+                    const ratingSelect = document.getElementById(`rating-${recId}`);
+                    const commentField = document.getElementById(`feedback-comment-${recId}`);
+
+                    const ratingValue = ratingSelect.value;
+                    const commentValue = commentField.value.trim();
+
+                    // Simple front-end check; ensure a rating was chosen
+                    if (!ratingValue) {
+                        alert('Please select a rating (1–10) before submitting.');
+                        return;
+                    }
+
+                    // Send feedback to the server
+                    sendFeedback(articleId, recId, ratingValue, commentValue);
+
+                    // Optionally clear fields
+                    ratingSelect.value = '';
+                    commentField.value = '';
                 });
             });
 
-            // Attach event listeners to dislike buttons
-            const dislikeButtons = document.querySelectorAll('.dislike-button');
-            dislikeButtons.forEach(function(button) {
-                button.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    const articleId = this.getAttribute('data-article-id');
-                    const recId = this.getAttribute('data-rec-id');
-                    toggleFeedback(this, articleId, recId, 'dislike');
-                });
-            });
-
-            // Function to toggle feedback
-            function toggleFeedback(button, articleId, recommendationId, feedbackType) {
-                // Determine the opposite feedback type
-                const oppositeType = feedbackType === 'like' ? 'dislike' : 'like';
-
-                // Update feedback state
-                if (feedbackState[recommendationId] === feedbackType) {
-                    // User is undoing their feedback
-                    feedbackState[recommendationId] = null;
-                    sendFeedback(articleId, recommendationId, 'neutral');
-                    updateButtonStyles(recommendationId, null);
-                } else {
-                    // User is providing new feedback
-                    feedbackState[recommendationId] = feedbackType;
-                    sendFeedback(articleId, recommendationId, feedbackType);
-                    updateButtonStyles(recommendationId, feedbackType);
-                }
-            }
-
-            // Function to send feedback to backend
-            function sendFeedback(articleId, recommendationId, feedbackType) {
+            // Function to send feedback to the backend
+            function sendFeedback(articleId, recommendationId, rating, comment) {
                 fetch('{{ url_for('feedback') }}', {
                     method: 'POST',
                     headers: {
@@ -164,33 +175,17 @@
                     body: JSON.stringify({
                         'article_id': articleId,
                         'recommendation_id': recommendationId,
-                        'feedback': feedbackType
+                        'rating': rating,
+                        'comment': comment
                     })
                 })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Feedback submitted:', data);
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                });
-            }
-
-            // Function to update button styles based on feedback state
-            function updateButtonStyles(recommendationId, feedbackType) {
-                const likeButton = document.querySelector(`.like-button[data-rec-id="${recommendationId}"]`);
-                const dislikeButton = document.querySelector(`.dislike-button[data-rec-id="${recommendationId}"]`);
-
-                // Reset styles
-                likeButton.classList.remove('active');
-                dislikeButton.classList.remove('active');
-
-                // Apply active class to the selected feedback
-                if (feedbackType === 'like') {
-                    likeButton.classList.add('active');
-                } else if (feedbackType === 'dislike') {
-                    dislikeButton.classList.add('active');
-                }
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Feedback submitted:', data);
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
             }
         });
     </script>
