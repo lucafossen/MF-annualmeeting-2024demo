@@ -84,5 +84,49 @@ def feedback():
     dump_db_jsonl()
     return jsonify({'status': 'success'}), 200
 
+@app.route('/sus', methods=['GET', 'POST'])
+def sus():
+    if request.method == 'POST':
+        # Collect demographic info
+        age = request.form.get('age')
+        gender = request.form.get('gender')
+
+        # Gather all SUS responses
+        sus_responses = {}
+        for i in range(1, 11):
+            sus_key = f"sus_question{i}"
+            sus_responses[sus_key] = request.form.get(sus_key)
+
+        # Prepare data to store
+        session_id = session.get('session_id')
+        timestamp = datetime.now(timezone.utc).timestamp()
+
+        # We store everything under "sus_feedback" in the same document in "feedback" collection
+        sus_update_data = {
+            "sus_feedback": {
+                "timestamp": timestamp,
+                "age": age,
+                "gender": gender,
+                "sus_responses": sus_responses
+            }
+        }
+
+        # Update or insert the document for this session
+        mongo.db.feedback.update_one(
+            {"session_id": session_id},
+            {
+                "$setOnInsert": {"session_id": session_id},
+                "$set": sus_update_data
+            },
+            upsert=True
+        )
+
+        # Optionally dump after updating
+        dump_db_jsonl()
+
+        return "Takk for at du svarte på undersøkelsen!"
+    else:
+        return render_template('sus.html')
+
 if __name__ == "__main__":
     app.run(debug=True)

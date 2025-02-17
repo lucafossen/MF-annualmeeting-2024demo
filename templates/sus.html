@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>System Usability Scale Survey</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+<body>
+<h1>System Usability Scale Undersøkelse</h1>
+<p>Vennligst svar på følgende spørsmål om din opplevelse med å bruke systemet vårt.</p>
+
+<form action="{{ url_for('sus') }}" method="post">
+    <div class="question-section">
+        <!-- Age Question -->
+        <div class="question">
+            <label for="age"><b>Alder:</b></label>
+            <input type="number" id="age" name="age" min="0" required>
+        </div>
+
+        <!-- Gender Question -->
+        <div class="question">
+            <label for="gender"><b>Kjønn:</b></label>
+            <select id="gender" name="gender" required>
+                <option value="" disabled selected>Velg ditt kjønn</option>
+                <option value="female">Kvinne</option>
+                <option value="male">Mann</option>
+                <option value="non_binary">Ikke-binær</option>
+                <option value="prefer_not_to_say">Foretrekker å ikke si</option>
+            </select>
+        </div>
+        <hr>
+
+        <!-- SUS Questions -->
+        {% for q_num, q_text in [
+            (1, 'Jeg tror at jeg ville likt å bruke dette systemet ofte.'),
+            (2, 'Jeg syntes systemet var unødvendig komplekst.'),
+            (3, 'Jeg syntes systemet var lett å bruke.'),
+            (4, 'Jeg tror at jeg ville trengt støtte fra en teknisk person for å kunne bruke dette systemet.'),
+            (5, 'Jeg syntes de ulike funksjonene i dette systemet var godt integrert.'),
+            (6, 'Jeg syntes det var for mye inkonsistens i dette systemet.'),
+            (7, 'Jeg vil tro at de fleste mennesker ville lært å bruke dette systemet veldig raskt.'),
+            (8, 'Jeg syntes systemet var veldig tungvint å bruke.'),
+            (9, 'Jeg følte meg veldig trygg på å bruke systemet.'),
+            (10, 'Jeg trengte å lære mange ting før jeg kunne komme i gang med dette systemet.')
+        ] %}
+            {% with question_number=q_num, question_text=q_text, question_name='sus_question' ~ q_num %}
+                {% include 'partials/sus_question_template.html' %}
+            {% endwith %}
+        {% endfor %}
+    </div>
+    <button type="submit" class="btn">Send inn</button>
+</form>
+</body>
+</html>
