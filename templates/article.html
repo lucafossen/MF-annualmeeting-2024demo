@@ -58,6 +58,9 @@
                 <p>Tool for journalists and editors - Helping them find related articles to their story</p>
             </a>
         </div>
+        <button id="susButton" disabled style="background-color: #d3d3d3; cursor: not-allowed;">
+            Proceed to SUS
+        </button>
         <h2>Main article:</h2>
 
         <div class="main-article-item">
@@ -182,11 +185,49 @@
                     .then(response => response.json())
                     .then(data => {
                         console.log('Feedback submitted:', data);
+                        updateSusButton(); // Update SUS button after feedback is sent
                     })
                     .catch((error) => {
                         console.error('Error:', error);
                     });
             }
+
+            // Function to update the SUS button based on the current rating count
+            function updateSusButton() {
+                const susButton = document.getElementById('susButton');
+
+                // Fetch the user's current rating count
+                fetch('/get_rating_count')
+                .then(response => response.json())
+                .then(data => {
+                    const count = data.count || 0;
+                    // Set the threshold for enabling the SUS button
+                    const threshold = 5;
+
+                    if (count >= threshold) {
+                        // Enable the button
+                        susButton.disabled = false;
+                        susButton.style.backgroundColor = '#0077cc';
+                        susButton.style.cursor = 'pointer';
+                        susButton.innerText = `Proceed to SUS`;
+
+                        // When clicked, direct user to SUS page
+                        susButton.addEventListener('click', () => {
+                            window.location.href = '/sus';
+                        });
+
+                    } else {
+                        // If below threshold, optionally show how many more needed
+                        susButton.innerText = `Please rate ${threshold - count} more to unlock SUS`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Unable to fetch rating count:', error);
+                });
+            }
+
+            // Initial call to update the SUS button on page load
+            updateSusButton();
         });
     </script>
 
