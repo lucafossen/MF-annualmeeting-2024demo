@@ -81,7 +81,6 @@ def feedback():
         upsert=True
     )
 
-    dump_db_jsonl()
     return jsonify({'status': 'success'}), 200
 
 @app.route('/sus', methods=['GET', 'POST'])
@@ -111,7 +110,7 @@ def sus():
             }
         }
 
-        # Update or insert the document for this session
+        # Update the document for this session
         mongo.db.feedback.update_one(
             {"session_id": session_id},
             {
@@ -127,6 +126,20 @@ def sus():
         return "Takk for at du svarte på undersøkelsen!"
     else:
         return render_template('sus.html')
+
+@app.route('/get_rating_count', methods=['GET'])
+def get_rating_count():
+    session_id = session.get('session_id')
+    doc = mongo.db.feedback.find_one({"session_id": session_id})
+
+    count = 0
+    # If we have feedback, count how many recommendation-level feedback entries there are
+    if doc and "feedback" in doc:
+        for article_id, recommendations in doc["feedback"].items():
+            # Each article has a dict of recommendations, so add up their length
+            count += len(recommendations)
+
+    return jsonify({'count': count})
 
 if __name__ == "__main__":
     app.run(debug=True)
