@@ -83,7 +83,7 @@
                 <p id="color-explainer"><i>Articles that were also picked by editors are highlighted in green</i></p>
                 <ul class="small-articles">
                     {% for rec in recommendations %}
-                    <li class="recommendation-item {% if rec.uuid in article.related_articles %}highlighted-recommendation{% else %}normal-recommendation{% endif %}">
+                    <li class="recommendation-item normal-recommendation">
                         <a href="{{ url_for('recommendation', article_id=article.uuid, recommendation_id=rec.uuid) }}">
                             <img src="{{ rec.image_url or 'https://via.placeholder.com/150' }}" alt="No image">
                             <div class="recommendation-content">
