@@ -1,0 +1,15 @@
+<div class="sus-question">
+    <p style="width: 70%;"><b>{{ question_number }}. {{ question_text }}</b></p>
+    <div class="question-scale-grid" style="width: 30%; grid-template-columns: repeat(5, 1fr);">
+        <!-- Radio Buttons Row -->
+        {% for value in range(1,6) %}
+            <label>
+                <input class="large-radio" type="radio" name="{{ question_name }}" value="{{ value }}" required>
+                <br>
+                <br>
+                <span>{{ value }}</span>
+            </label>
+        {% endfor %}
+    </div>
+</div>
+<hr>
