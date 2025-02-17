@@ -6,6 +6,7 @@ from bson.objectid import ObjectId
 from dotenv import load_dotenv
 import os
 from datetime import datetime, timezone
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -28,7 +29,16 @@ def assign_session_id():
 
 @app.route('/')
 def home():
-    articles_list = facade.testset_articles_df[['uuid', 'title', 'section']].to_dict('records')
+    # Convert creation_date to a proper datetime type
+    facade.testset_articles_df['creation_date'] = pd.to_datetime(
+        facade.testset_articles_df['creation_date'], errors='coerce'
+    )
+
+    # Sort by creation_date descending.
+    sorted_df = facade.testset_articles_df.sort_values(by='creation_date', ascending=False)
+
+    articles_list = sorted_df[['uuid', 'title', 'section']].to_dict('records')
+
     return render_template('home.html', articles=articles_list)
 
 @app.route('/article/<string:article_id>')
