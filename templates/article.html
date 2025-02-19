@@ -97,7 +97,10 @@
 
                             <div class="feedback-section">
                             <label for="rating-{{ rec.uuid }}">Rate (1–10):</label>
-                            <select class="rating-input" id="rating-{{ rec.uuid }}" data-article-id="{{ article.uuid }}" data-rec-id="{{ rec.uuid }}">
+                            <select class="rating-input"
+                                    id="rating-{{ rec.uuid }}"
+                                    data-article-id="{{ article.uuid }}"
+                                    data-rec-id="{{ rec.uuid }}">
                                 <option value="">-- Select --</option>
                                 {% for i in range(1, 11) %}
                                 <option value="{{ i }}">{{ i }}</option>
@@ -114,110 +117,105 @@
                                 id="feedback-comment-{{ rec.uuid }}"
                                 data-article-id="{{ article.uuid }}"
                                 data-rec-id="{{ rec.uuid }}"
-                                placeholder="Your thoughts..."
-                            ></textarea>
-
-                            <button
-                                class="submit-feedback"
-                                data-article-id="{{ article.uuid }}"
-                                data-rec-id="{{ rec.uuid }}"
-                            >
-                                Submit
-                            </button>
-                            </div>
-                        </li>
+                                placeholder="Your thoughts...">
+                            </textarea>
+                        </div>
+                    </li>
                     {% else %}
                     <li>No recommendations available for this article.</li>
                     {% endfor %}
                 </ul>
             </div>
-
         </div>
+
+        <!-- Single button to submit all feedback at once -->
+        <button id="submitAll" style="margin-top: 20px;">Submit All Feedback</button>
+
         <a href="{{ url_for('home') }}" class="back-link">Back to Home</a>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            // Attach event listeners to the new "Submit" buttons
-            const feedbackButtons = document.querySelectorAll('.submit-feedback');
-            feedbackButtons.forEach(function (button) {
-                button.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    const articleId = this.getAttribute('data-article-id');
-                    const recId = this.getAttribute('data-rec-id');
+            const susButton = document.getElementById('susButton');
 
-                    // Retrieve the rating and text from their respective elements
-                    const ratingSelect = document.getElementById(`rating-${recId}`);
-                    const commentField = document.getElementById(`feedback-comment-${recId}`);
+            // Single "Submit All" button
+            const submitAllButton = document.getElementById('submitAll');
+            submitAllButton.addEventListener('click', function (event) {
+                event.preventDefault();
 
+                // Gather all feedback
+                const recommendations = document.querySelectorAll('.recommendation-item');
+                let feedbackData = [];
+
+                recommendations.forEach((recItem) => {
+                    const ratingSelect = recItem.querySelector('.rating-input');
+                    const commentField = recItem.querySelector('.feedback-comment');
+
+                    const articleId = ratingSelect.getAttribute('data-article-id');
+                    const recId = ratingSelect.getAttribute('data-rec-id');
                     const ratingValue = ratingSelect.value;
                     const commentValue = commentField.value.trim();
 
-                    // Simple front-end check; ensure a rating was chosen
-                    if (!ratingValue) {
-                        alert('Please select a rating (1–10) before submitting.');
-                        return;
+                    // Check if user selected a rating
+                    if (ratingValue) {
+                        feedbackData.push({
+                            article_id: articleId,
+                            recommendation_id: recId,
+                            rating: ratingValue,
+                            comment: commentValue
+                        });
                     }
+                });
 
-                    // Send feedback to the server
-                    sendFeedback(articleId, recId, ratingValue, commentValue);
+                if (feedbackData.length === 0) {
+                    alert('Please select at least one rating before submitting.');
+                    return;
+                }
 
-                    // Optionally clear fields
+                // Send all feedback in a single batch of fetch calls
+                feedbackData.forEach((feedback) => {
+                    fetch('{{ url_for('feedback') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(feedback)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Feedback submitted:', data);
+                        updateSusButton();
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+                });
+
+                // Reset the fields
+                recommendations.forEach((recItem) => {
+                    const ratingSelect = recItem.querySelector('.rating-input');
+                    const commentField = recItem.querySelector('.feedback-comment');
                     ratingSelect.value = '';
                     commentField.value = '';
                 });
             });
 
-            // Function to send feedback to the backend
-            function sendFeedback(articleId, recommendationId, rating, comment) {
-                fetch('{{ url_for('feedback') }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        'article_id': articleId,
-                        'recommendation_id': recommendationId,
-                        'rating': rating,
-                        'comment': comment
-                    })
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Feedback submitted:', data);
-                        updateSusButton(); // Update SUS button after feedback is sent
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                    });
-            }
-
-            // Function to update the SUS button based on the current rating count
             function updateSusButton() {
-                const susButton = document.getElementById('susButton');
-
-                // Fetch the user's current rating count
                 fetch('/get_rating_count')
                 .then(response => response.json())
                 .then(data => {
                     const count = data.count || 0;
-                    // Set the threshold for enabling the SUS button
                     const threshold = 5;
 
                     if (count >= threshold) {
-                        // Enable the button
                         susButton.disabled = false;
                         susButton.style.backgroundColor = '#0077cc';
                         susButton.style.cursor = 'pointer';
                         susButton.innerText = `Proceed to SUS`;
-
-                        // When clicked, direct user to SUS page
                         susButton.addEventListener('click', () => {
                             window.location.href = '/sus';
                         });
-
                     } else {
-                        // If below threshold, optionally show how many more needed
                         susButton.innerText = `Please rate ${threshold - count} more to unlock SUS`;
                     }
                 })
@@ -229,7 +227,6 @@
             // Initial call to update the SUS button on page load
             updateSusButton();
         });
-    </script>
-
+        </script>
 </body>
 </html>
