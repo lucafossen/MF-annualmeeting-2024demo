@@ -64,7 +64,8 @@
         <h2>Main article:</h2>
 
         <div class="main-article-item">
-            <a href="https://tv2.no/a/{{ article.uuid }}" class="external-link-button">Visit original article on TV 2</a>
+            <a href="https://tv2.no/a/{{ article.uuid }}" class="external-link-button">
+                Visit original article on TV 2</a>
             <div class="main-article-content">
                 <h1 class="main-article-title">{{ article.title }}</h1>
                 <p class="article-byline">{{ article.byline | join(', ') }}</p>
@@ -91,20 +92,28 @@
                             <img src="{{ rec.image_url or 'https://via.placeholder.com/150' }}" alt="No image">
                             <div class="recommendation-content">
                                 <span class="recommendation-title">{{ rec.title }}</span>
-                                <p class="recommendation-description">{{ rec.byline | join(', ') }}<br>{{ rec.creation_date }}</p>
+                                <p class="recommendation-description">{{ rec.byline | join(', ') }}<br>{{
+                                    rec.creation_date }}</p>
                             </div>
-                            </a>
+                        </a>
 
-                            <div class="feedback-section">
+                        <div class="feedback-section">
                             <label for="rating-{{ rec.uuid }}">Rate (1–10):</label>
-                            <select class="rating-input"
-                                    id="rating-{{ rec.uuid }}"
-                                    data-article-id="{{ article.uuid }}"
-                                    data-rec-id="{{ rec.uuid }}">
+                            <select class="rating-input" id="rating-{{ rec.uuid }}" data-article-id="{{ article.uuid }}"
+                                data-rec-id="{{ rec.uuid }}">
                                 <option value="">-- Select --</option>
-                                {% for i in range(1, 11) %}
-                                <option value="{{ i }}">{{ i }}</option>
-                                {% endfor %}
+                                    // Start of Selection
+                                    {% for i in range(1, 11) %}
+                                        {% if i == 1 %}
+                                            <option value="{{ i }}">{{ i }} (helt irrelevant)</option>
+                                        {% elif i == 5 %}
+                                            <option value="{{ i }}">{{ i }} (litt relevant)</option>
+                                        {% elif i == 10 %}
+                                            <option value="{{ i }}">{{ i }} (helt relevant)</option>
+                                        {% else %}
+                                            <option value="{{ i }}">{{ i }}</option>
+                                        {% endif %}
+                                    {% endfor %}
                             </select>
 
 
@@ -112,12 +121,9 @@
                             <br>
 
                             <label for="feedback-comment-{{ rec.uuid }}">Comment:</label>
-                            <textarea
-                                class="feedback-comment"
-                                id="feedback-comment-{{ rec.uuid }}"
-                                data-article-id="{{ article.uuid }}"
-                                data-rec-id="{{ rec.uuid }}"
-                                placeholder="Your thoughts...">
+                            <textarea class="feedback-comment" id="feedback-comment-{{ rec.uuid }}"
+                                data-article-id="{{ article.uuid }}" data-rec-id="{{ rec.uuid }}"
+                                placeholder="Your thoughts... (optional)">
                             </textarea>
                         </div>
                     </li>
@@ -129,7 +135,7 @@
         </div>
 
         <!-- Single button to submit all feedback at once -->
-        <button id="submitAll" style="margin-top: 20px;">Submit All Feedback</button>
+        <button id="submitAll" class="btn">Submit feedback</button>
 
         <a href="{{ url_for('home') }}" class="back-link">Back to Home</a>
     </div>
@@ -181,52 +187,58 @@
                         },
                         body: JSON.stringify(feedback)
                     })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Feedback submitted:', data);
-                        updateSusButton();
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Feedback submitted:', data);
+                            updateSusButton();
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                        });
                 });
 
                 // Reset the fields
-                recommendations.forEach((recItem) => {
-                    const ratingSelect = recItem.querySelector('.rating-input');
-                    const commentField = recItem.querySelector('.feedback-comment');
-                    ratingSelect.value = '';
-                    commentField.value = '';
-                });
+                    // Start of Selection
+                    recommendations.forEach((recItem) => {
+                        const ratingSelect = recItem.querySelector('.rating-input');
+                        const commentField = recItem.querySelector('.feedback-comment');
+
+                        // Only reset if a rating was selected
+                        if (ratingSelect.value) {
+                            ratingSelect.value = '';
+                            commentField.value = '';
+                        }
+                    });
             });
 
             function updateSusButton() {
                 fetch('/get_rating_count')
-                .then(response => response.json())
-                .then(data => {
-                    const count = data.count || 0;
-                    const threshold = 5;
+                    .then(response => response.json())
+                    .then(data => {
+                        const count = data.count || 0;
+                        const threshold = 5;
 
-                    if (count >= threshold) {
-                        susButton.disabled = false;
-                        susButton.style.backgroundColor = '#0077cc';
-                        susButton.style.cursor = 'pointer';
-                        susButton.innerText = `Proceed to SUS`;
-                        susButton.addEventListener('click', () => {
-                            window.location.href = '/sus';
-                        });
-                    } else {
-                        susButton.innerText = `Please rate ${threshold - count} more to unlock SUS`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Unable to fetch rating count:', error);
-                });
+                        if (count >= threshold) {
+                            susButton.disabled = false;
+                            susButton.style.backgroundColor = '#0077cc';
+                            susButton.style.cursor = 'pointer';
+                            susButton.innerText = `Proceed to SUS`;
+                            susButton.addEventListener('click', () => {
+                                window.location.href = '/sus';
+                            });
+                        } else {
+                            susButton.innerText = `Please rate ${threshold - count} more to unlock SUS`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Unable to fetch rating count:', error);
+                    });
             }
 
             // Initial call to update the SUS button on page load
             updateSusButton();
         });
-        </script>
+    </script>
 </body>
+
 </html>
