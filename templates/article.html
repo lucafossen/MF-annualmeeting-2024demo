@@ -120,8 +120,7 @@
                             <label for="feedback-comment-{{ rec.uuid }}">Comment:</label>
                             <textarea class="feedback-comment" id="feedback-comment-{{ rec.uuid }}"
                                 data-article-id="{{ article.uuid }}" data-rec-id="{{ rec.uuid }}"
-                                placeholder="Your thoughts... (optional)">
-                            </textarea>
+                                placeholder="Your thoughts... (optional)"></textarea>
                         </div>
                     </li>
                     {% else %}
@@ -142,6 +141,7 @@
     </div>
 
     <script>
+        var ratingThreshold = 5; // Outside of the function to make it easier to change
         document.addEventListener('DOMContentLoaded', function () {
             const susButton = document.getElementById('susButton');
 
@@ -217,9 +217,8 @@
                     .then(response => response.json())
                     .then(data => {
                         const count = data.count || 0;
-                        const threshold = 5;
 
-                        if (count >= threshold) {
+                        if (count >= ratingThreshold) {
                             susButton.disabled = false;
                             susButton.style.backgroundColor = '#00b613';
                             susButton.style.cursor = 'pointer';
@@ -228,7 +227,7 @@
                                 window.location.href = '/sus';
                             });
                         } else {
-                            susButton.innerText = `Please rate ${threshold - count} more to unlock SUS`;
+                            susButton.innerText = `Please rate ${ratingThreshold - count} more to unlock SUS`;
                         }
                     })
                     .catch(error => {
