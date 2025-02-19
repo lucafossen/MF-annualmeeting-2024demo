@@ -82,7 +82,8 @@ body {
 }
 
 .btn {
-    display: inline-block;
+    display: block;
+    margin: 0 auto;
     padding: 10px 20px;
     background-color: #0077cc;
     color: white;
@@ -102,7 +103,7 @@ body {
 
 .small-articles {
     display: flex;
-    overflow-x: auto;
+    flex-wrap: wrap;
     gap: 20px;
     list-style-type: none;
     padding: 0;
@@ -110,19 +111,22 @@ body {
 }
 
 .recommendation-item {
-    flex: 0 0 auto;
-    width: 300px;
+    /* flex: 0 0 calc(25% - 20px) will give you four items per row */
+    flex: 0 0 calc(20% - 20px);
+    box-sizing: border-box;
     background-color: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
+    margin-bottom: 20px;
 }
 
 .recommendation-item img {
     width: 100%;
-    height: auto;
+    aspect-ratio: 1.5 / 1;
+    object-fit: cover;
 }
 
 .missed-item {

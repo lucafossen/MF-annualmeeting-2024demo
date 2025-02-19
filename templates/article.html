@@ -58,9 +58,6 @@
                 <p>Tool for journalists and editors - Helping them find related articles to their story</p>
             </a>
         </div>
-        <button id="susButton" disabled style="background-color: #d3d3d3; cursor: not-allowed;">
-            Proceed to SUS
-        </button>
         <h2>Main article:</h2>
 
         <div class="main-article-item">
@@ -136,6 +133,10 @@
 
         <!-- Single button to submit all feedback at once -->
         <button id="submitAll" class="btn">Submit feedback</button>
+
+        <button id="susButton" class="btn" disabled style="background-color: #d3d3d3; cursor: not-allowed;">
+            Proceed to SUS
+        </button>
 
         <a href="{{ url_for('home') }}" class="back-link">Back to Home</a>
     </div>
@@ -220,7 +221,7 @@
 
                         if (count >= threshold) {
                             susButton.disabled = false;
-                            susButton.style.backgroundColor = '#0077cc';
+                            susButton.style.backgroundColor = '#00b613';
                             susButton.style.cursor = 'pointer';
                             susButton.innerText = `Proceed to SUS`;
                             susButton.addEventListener('click', () => {
