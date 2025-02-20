@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Article Recommendations Home</title>
@@ -10,7 +9,6 @@
         .filter-buttons {
             margin-bottom: 20px;
         }
-
         .section-button {
             padding: 10px 15px;
             margin-right: 5px;
@@ -20,13 +18,10 @@
             cursor: pointer;
             border-radius: 4px;
         }
-
         .section-button.active {
             background-color: #4285f4;
             color: white;
         }
-
-        /* Responsive styling */
         @media (max-width: 600px) {
             .section-button {
                 display: block;
@@ -34,20 +29,87 @@
                 margin-bottom: 10px;
             }
         }
+
+        /* Instruction section styling */
+        .instruction-section {
+            background-color: #fafafa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+        }
+
+        /* Overlay styling */
+        #instructionsOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none; /* hidden by default */
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+        }
+        .overlay-content {
+            background-color: #fff;
+            width: 80%;
+            max-width: 600px;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+        }
+        .overlay-content button {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: #0077cc;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .overlay-content button:hover {
+            background-color: #005fa3;
+        }
     </style>
 </head>
-
 <body>
+    <!-- Overlay (hidden on subsequent visits) -->
+    <div id="instructionsOverlay">
+        <div class="overlay-content">
+            <h2>Welcome!</h2>
+            <p>
+                Here's how to complete the survey:
+            </p>
+            <ol>
+                <li>Pick any article listed on this page.</li>
+                <li>Rate the recommended articles on the next page.</li>
+                <li>Once you have at least five ratings, a “Proceed to SUS” button will appear to complete the usability survey.</li>
+            </ol>
+            <button onclick="hideOverlay()">Understood</button>
+        </div>
+    </div>
+
     <div class="container">
         <div class="header">
             <a href="/" class="no-underline-link">
-                <img src="https://mediafutures.no/wp-content/uploads/tv2_scaled.png" alt="TV 2 Logo"
-                    class="tv2-logo">
+                <img src="https://mediafutures.no/wp-content/uploads/tv2_scaled.png" alt="TV 2 Logo" class="tv2-logo">
                 <h1>LLMs as Journalists</h1>
                 <p>Tool for journalists and editors - Helping them find related articles to their story</p>
                 <p>Choose an Article</p>
             </a>
         </div>
+
+        <div class="instruction-section">
+            <h2>Quick Instructions</h2>
+            <p>
+                1. Pick any article listed on this page. <br>
+                2. Rate the recommended articles on the next page. <br>
+                3. Once you have at least five ratings, a “Proceed to SUS” button will appear to complete the usability survey.
+            </p>
+        </div>
+
         <div class="search-bar">
             <input type="text" class="search-input" id="articleSearch" placeholder="Type to search articles...">
         </div>
@@ -66,121 +128,113 @@
                 <li>No articles available.</li>
             {% endfor %}
         </ul>
+    </div>
 
-        <script>
-            // Get references to DOM elements
-            const articles = document.querySelectorAll('.article-item');
-            const searchInput = document.getElementById('articleSearch');
-            const filterButtonsContainer = document.getElementById('filterButtons');
-            let selectedSections = new Set(['All']); // Start with 'All' selected
+    <script>
+        // Show overlay on the first visit
+        window.addEventListener('load', () => {
+            if (!localStorage.getItem('shownOverlay')) {
+                document.getElementById('instructionsOverlay').style.display = 'block';
+            }
+        });
 
-            // Function to generate the section buttons
-            function generateSectionButtons() {
-                const sectionsSet = new Set();
-                sectionsSet.add('All'); // Add 'All' section
+        function hideOverlay() {
+            document.getElementById('instructionsOverlay').style.display = 'none';
+            localStorage.setItem('shownOverlay', 'true');
+        }
 
-                // Collect unique sections from the articles
-                articles.forEach(function(article) {
-                    const section = article.getAttribute('data-section');
-                    if (section) {
-                        sectionsSet.add(section);
-                    }
-                });
+        // Original script for searching and filtering
+        const articles = document.querySelectorAll('.article-item');
+        const searchInput = document.getElementById('articleSearch');
+        const filterButtonsContainer = document.getElementById('filterButtons');
+        let selectedSections = new Set(['All']); // Start with 'All' selected
 
-                const sections = Array.from(sectionsSet).sort();
+        function generateSectionButtons() {
+            const sectionsSet = new Set();
+            sectionsSet.add('All'); // Add 'All' section
 
-                // Create buttons
-                sections.forEach(function(section) {
-                    const button = document.createElement('button');
-                    button.classList.add('section-button');
-                    button.setAttribute('data-section', section);
-                    button.textContent = section;
+            // Collect unique sections from the articles
+            articles.forEach(function(article) {
+                const section = article.getAttribute('data-section');
+                if (section) {
+                    sectionsSet.add(section);
+                }
+            });
 
-                    if (selectedSections.has(section)) {
-                        button.classList.add('active');
-                    }
+            const sections = Array.from(sectionsSet).sort();
 
-                    // Add click event listener
-                    button.addEventListener('click', function() {
-                        const section = this.getAttribute('data-section');
+            // Create buttons
+            sections.forEach(function(section) {
+                const button = document.createElement('button');
+                button.classList.add('section-button');
+                button.setAttribute('data-section', section);
+                button.textContent = section;
 
-                        if (section === 'All') {
-                            // If 'All' is selected, clear other selections
-                            selectedSections.clear();
-                            selectedSections.add('All');
+                if (selectedSections.has(section)) {
+                    button.classList.add('active');
+                }
 
-                            // Update the active button styling
-                            document.querySelectorAll('.section-button').forEach(function(btn) {
-                                btn.classList.remove('active');
-                                if (btn.getAttribute('data-section') === 'All') {
-                                    btn.classList.add('active');
-                                }
-                            });
+                button.addEventListener('click', function() {
+                    const section = this.getAttribute('data-section');
+                    if (section === 'All') {
+                        selectedSections.clear();
+                        selectedSections.add('All');
+                        document.querySelectorAll('.section-button').forEach(function(btn) {
+                            btn.classList.remove('active');
+                            if (btn.getAttribute('data-section') === 'All') {
+                                btn.classList.add('active');
+                            }
+                        });
+                    } else {
+                        if (selectedSections.has(section)) {
+                            selectedSections.delete(section);
+                            this.classList.remove('active');
                         } else {
-                            // Toggle the selection of the section
-                            if (selectedSections.has(section)) {
-                                selectedSections.delete(section);
-                                this.classList.remove('active');
-                            } else {
-                                selectedSections.add(section);
-                                this.classList.add('active');
-                            }
-
-                            // If any section other than 'All' is selected, deselect 'All'
-                            if (selectedSections.has('All')) {
-                                selectedSections.delete('All');
-                                const allButton = document.querySelector('.section-button[data-section="All"]');
-                                if (allButton) {
-                                    allButton.classList.remove('active');
-                                }
-                            }
-
-                            // If no sections are selected, default back to 'All'
-                            if (selectedSections.size === 0) {
-                                selectedSections.add('All');
-                                const allButton = document.querySelector('.section-button[data-section="All"]');
-                                if (allButton) {
-                                    allButton.classList.add('active');
-                                }
+                            selectedSections.add(section);
+                            this.classList.add('active');
+                        }
+                        if (selectedSections.has('All')) {
+                            selectedSections.delete('All');
+                            const allButton = document.querySelector('.section-button[data-section="All"]');
+                            if (allButton) {
+                                allButton.classList.remove('active');
                             }
                         }
-
-                        // Filter articles based on new selection
-                        filterArticles();
-                    });
-
-                    // Add button to the container
-                    filterButtonsContainer.appendChild(button);
-                });
-            }
-
-            // Filter articles on search input
-            searchInput.addEventListener('input', filterArticles);
-
-            // Function to filter articles based on search input and selected sections
-            function filterArticles() {
-                const filterText = searchInput.value.toLowerCase();
-
-                articles.forEach(function(article) {
-                    const title = article.getAttribute('data-title');
-                    const section = article.getAttribute('data-section');
-
-                    const matchesTitle = title.includes(filterText);
-                    const matchesSection = selectedSections.has('All') || selectedSections.has(section);
-
-                    if (matchesTitle && matchesSection) {
-                        article.style.display = '';
-                    } else {
-                        article.style.display = 'none';
+                        if (selectedSections.size === 0) {
+                            selectedSections.add('All');
+                            const allButton = document.querySelector('.section-button[data-section="All"]');
+                            if (allButton) {
+                                allButton.classList.add('active');
+                            }
+                        }
                     }
+                    filterArticles();
                 });
-            }
+                filterButtonsContainer.appendChild(button);
+            });
+        }
 
-            // Generate the section buttons on page load
-            generateSectionButtons();
+        searchInput.addEventListener('input', filterArticles);
 
-        </script>
-    </div>
+        function filterArticles() {
+            const filterText = searchInput.value.toLowerCase();
+
+            articles.forEach(function(article) {
+                const title = article.getAttribute('data-title');
+                const section = article.getAttribute('data-section');
+
+                const matchesTitle = title.includes(filterText);
+                const matchesSection = selectedSections.has('All') || selectedSections.has(section);
+
+                if (matchesTitle && matchesSection) {
+                    article.style.display = '';
+                } else {
+                    article.style.display = 'none';
+                }
+            });
+        }
+
+        generateSectionButtons();
+    </script>
 </body>
-
 </html>
