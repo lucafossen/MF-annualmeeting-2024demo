@@ -54,15 +54,13 @@
         <div class="header">
             <a href="/" class="no-underline-link">
                 <img src="https://mediafutures.no/wp-content/uploads/tv2_scaled.png" alt="TV 2 Logo" class="tv2-logo">
-                <h1>LLMs as Journalists</h1>
+                <h1>AI supporting Journalists</h1>
                 <p>Tool for journalists and editors - Helping them find related articles to their story</p>
             </a>
         </div>
         <h2>Main article:</h2>
 
         <div class="main-article-item">
-            <a href="https://tv2.no/a/{{ article.uuid }}" class="external-link-button">
-                Visit original article on TV 2</a>
             <div class="main-article-content">
                 <h1 class="main-article-title">{{ article.title }}</h1>
                 <p class="article-byline">{{ article.byline | join(', ') }}</p>
@@ -88,11 +86,13 @@
                             <img src="{{ rec.image_url or 'https://via.placeholder.com/150' }}" alt="No image">
                             <div class="recommendation-content">
                                 <span class="recommendation-title">{{ rec.title }}</span>
-                                <p class="recommendation-description">{{ rec.byline | join(', ') }}<br>{{
-                                    rec.creation_date }}</p>
+
+                                <!-- Should show "days since", "x days older" or somehitng like that -->
                             </div>
                         </a>
-
+                        <span class="recommendation-lead-text">{{ rec.lead_text }}</span>
+                        <br>
+                        <br>
                         <div class="feedback-section">
                             <label for="rating-{{ rec.uuid }}">Rate (1–10):</label>
                             <select class="rating-input" id="rating-{{ rec.uuid }}" data-article-id="{{ article.uuid }}"
