@@ -112,18 +112,20 @@
         </div>
         <h2>Main article:</h2>
 
-        <div class="main-article-item">
-            <div class="main-article-content">
-                <h1 class="main-article-title">{{ article.title }}</h1>
-                <br>
-                <!-- <p class="article-byline">{{ article.byline | join(', ') }}</p> -->
-                <!-- <p class="article-metadata">Published on {{ article.creation_date }} in {{ article.section }}</p> -->
-                <img src="{{ article.image_url or 'https://via.placeholder.com/150' }}" alt="{{ article.title }}">
-                <p class="article-lead-text">{{ article.lead_text }}</p>
-                <div class="article-full-text">
-                    <!-- Just showing the first 400 chars for now -->
-                    {{ article.body_text[:400]+"..." | safe }} <a href="https://tv2.no/a/{{ article.uuid }}"
-                        target="_blank">Read more (opens in new tab)</a>
+        <div class="main-article-item" style="display: flex; align-items: flex-start;">
+            <img src="{{ article.image_url or 'https://via.placeholder.com/150' }}" alt="{{ article.title }}">
+            <div class="main-article-content" >
+                <div>
+                    <h1 class="main-article-title">{{ article.title }}</h1>
+                    <br>
+                    <!-- <p class="article-byline">{{ article.byline | join(', ') }}</p> -->
+                    <!-- <p class="article-metadata">Published on {{ article.creation_date }} in {{ article.section }}</p> -->
+                    <p class="article-lead-text">{{ article.lead_text }}</p>
+                    <div class="article-full-text">
+                        <!-- Just showing the first 400 chars for now -->
+                        {{ article.body_text[:400]+"..." | safe }} <a href="https://tv2.no/a/{{ article.uuid }}"
+                            target="_blank">Read more (opens in new tab)</a>
+                    </div>
                 </div>
             </div>
         </div>
