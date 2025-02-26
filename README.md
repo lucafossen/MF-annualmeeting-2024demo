@@ -1,10 +1,17 @@
 # MediaFutures annual meeting demo
 
 ## Installation and running
-1. Copy necessary files into a new folder `data/`
+1. Copy necessary files (`articles_big_dataset.csv` and `combined_articles_recommendations.csv`) into a new folder `data/`
 2. Create a virtual environment and activate it
-3. install packages with `pip install -r requirements_all.txt`
-4. run webapp with `python app.py` and open the IP address specified in the terminal
+Note: you need to place  in the `data` folder before running (they were too big to push to github).
+
+3. Configre a .env file:
+```
+EXPERT_STUDY_SECRET_KEY=any_secret_key
+MONGODB_URI=mongodb://localhost:27017/mf_expert_study
+```
+4. install packages with `pip install -r requirements_all.txt`
+5. run webapp with `python app.py` and open the IP address specified in the terminal
 
 ## Project Structure
 
