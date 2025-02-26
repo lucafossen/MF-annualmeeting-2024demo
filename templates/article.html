@@ -46,10 +46,63 @@
         .toggle-container input[type="checkbox"] {
             display: none;
         }
+
+        /* Start of new styles to modernize dropdowns and text boxes */
+        select.rating-input, textarea.feedback-comment {
+            border: 1px solid #ccc;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            background-color: #f9f9f9;
+        }
+        select.rating-input:focus, textarea.feedback-comment:focus {
+            border-color: #66afe9;
+            box-shadow: 0 0 8px rgba(102,175,233,0.6);
+            outline: none;
+            background-color: #fff;
+        }
+        .recommendation-item {
+            display: flex;
+            flex-direction: column;
+            min-height: 300px; /* adjust this value as needed */
+        }
+
+        .feedback-section {
+            margin-top: auto;
+        }
+        /* New styles for the scroll hint */
+        .scroll-hint {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: 1100;
+        }
+        .scroll-hint.visible {
+            opacity: 1;
+        }
+        .scroll-hint .arrow {
+            font-size: 24px;
+            margin-right: 8px;
+        }
     </style>
 </head>
 
 <body>
+    <!-- Scroll hint container -->
+    <div id="scrollHint" class="scroll-hint">
+        <span class="arrow">&#8675;</span>
+        <span>Scroll down to rate AI recommendations</span>
+    </div>
     <div class="container">
         <div class="header">
             <a href="/" class="no-underline-link">
@@ -62,8 +115,9 @@
         <div class="main-article-item">
             <div class="main-article-content">
                 <h1 class="main-article-title">{{ article.title }}</h1>
-                <p class="article-byline">{{ article.byline | join(', ') }}</p>
-                <p class="article-metadata">Published on {{ article.creation_date }} in {{ article.section }}</p>
+                <br>
+                <!-- <p class="article-byline">{{ article.byline | join(', ') }}</p> -->
+                <!-- <p class="article-metadata">Published on {{ article.creation_date }} in {{ article.section }}</p> -->
                 <img src="{{ article.image_url or 'https://via.placeholder.com/150' }}" alt="{{ article.title }}">
                 <p class="article-lead-text">{{ article.lead_text }}</p>
                 <div class="article-full-text">
@@ -85,15 +139,16 @@
                             <img src="{{ rec.image_url or 'https://via.placeholder.com/150' }}" alt="No image">
                             <div class="recommendation-content">
                                 <span class="recommendation-title">{{ rec.title }}</span>
-
                                 <!-- Should show "days since", "x days older" or somehitng like that -->
                             </div>
                         </a>
+
+                        <span class="recommendation-age">Published {{ rec.recommendation_age }} earlier</span>
                         <span class="recommendation-lead-text">{{ rec.lead_text }}</span>
+
+                        <div class="feedback-section" style="background-color: #363a3c;">
                         <br>
-                        <br>
-                        <div class="feedback-section">
-                            <label for="rating-{{ rec.uuid }}">Rate (1–10):</label>
+                            <label for="rating-{{ rec.uuid }}" style="color: #effeff;">Rate (1–10):</label>
                             <select class="rating-input" id="rating-{{ rec.uuid }}" data-article-id="{{ article.uuid }}"
                                 data-rec-id="{{ rec.uuid }}">
                                 <option value="">-- Select --</option>
@@ -115,10 +170,12 @@
                             <br>
                             <br>
 
-                            <label for="feedback-comment-{{ rec.uuid }}">Comment:</label>
+                            <label for="feedback-comment-{{ rec.uuid }}" style="color: #effeff;"">Comment:</label>
                             <textarea class="feedback-comment" id="feedback-comment-{{ rec.uuid }}"
                                 data-article-id="{{ article.uuid }}" data-rec-id="{{ rec.uuid }}"
                                 placeholder="Your thoughts... (optional)"></textarea>
+                            <br>
+                            <br>
                         </div>
                     </li>
                     {% else %}
@@ -139,12 +196,44 @@
     </div>
 
     <script>
-        var ratingThreshold = 5; // Outside of the function to make it easier to change
+        var ratingThreshold = 5; // already defined
         document.addEventListener('DOMContentLoaded', function () {
             const susButton = document.getElementById('susButton');
-
-            // Single "Submit All" button
             const submitAllButton = document.getElementById('submitAll');
+            const scrollHint = document.getElementById('scrollHint');
+
+            // Check localStorage flag for the hint
+            const hintAlreadyShown = localStorage.getItem('scrollHintShown');
+
+            function hasScrolledSmallArticles() {
+                const smallArticlesSection = document.querySelector('.small-articles-section');
+                if (smallArticlesSection) {
+                    const rect = smallArticlesSection.getBoundingClientRect();
+                    if (rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            // Only set up the hint if the flag is not set
+            if (!hintAlreadyShown) {
+                // After 5 seconds, if the user hasn't scrolled yet, show the hint.
+                const hintTimeout = setTimeout(() => {
+                    if (!hasScrolledSmallArticles()) {
+                        scrollHint.classList.add('visible');
+                    }
+                }, 5000);
+
+                // When user scrolls, hide the hint (if visible) and set a flag.
+                function onUserScroll() {
+                    if (hasScrolledSmallArticles()) {
+                        scrollHint.classList.remove('visible');
+                        localStorage.setItem('scrollHintShown', 'true');
+                        window.removeEventListener('scroll', onUserScroll);
+                    }
+                }
+                window.addEventListener('scroll', onUserScroll);
+            }
             submitAllButton.addEventListener('click', function (event) {
                 event.preventDefault();
 

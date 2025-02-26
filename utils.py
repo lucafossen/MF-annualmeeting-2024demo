@@ -5,6 +5,7 @@ import json
 import os
 from db import mongo
 from datetime import datetime
+import humanize
 
 class Article:
 
@@ -169,6 +170,9 @@ class ArticleRecommendationFacade:
         # Get the 'related_articles' field for the article
         original_article_row = self.testset_articles_df[self.testset_articles_df['uuid'] == article_id]
         if not original_article_row.empty:
+            # Compute the original article's creation date once
+            original_creation_date = pd.to_datetime(original_article_row.iloc[0].get('creation_date', ''), errors='coerce')
+            print(f"Original creation date: {original_creation_date}")
             related_articles_field = original_article_row.iloc[0]['recommendations']
             if related_articles_field:
                 # Loop through the related articles of the original article
@@ -178,13 +182,21 @@ class ArticleRecommendationFacade:
                         article_data = {}
                     else:
                         article_data = recommended_article_row.iloc[0].to_dict()
-                    # Get the specific recommendation specifically for the recommendation
+                    # Get the specific recommendation details for the recommendation
                     for result in original_article_row.iloc[0]['recommendations results']:
                         if result[2] == article_id:
                             recommendation_llm_rating = result[0]
                             recommendation_similarity = int(round(result[3], 2)*100) # turn into percentage
                             recommendation_explanation = result[5]
-                    # This is essentially similar to the get_article method, but without full_text_embeddings, recommendations_results, ground_truth, recall_at_5, precision_at_5, map_at_5
+                    # Calculate the age difference (in a human-readable format) between recommended and original article
+                    rec_creation_date = pd.to_datetime(article_data.get('creation_date', ''), errors='coerce')
+                    recommendation_age = None
+                    if original_creation_date is not pd.NaT and rec_creation_date is not pd.NaT:
+                        delta = rec_creation_date - original_creation_date
+                        recommendation_age = humanize.naturaldelta(delta.to_pytimedelta())
+                    print(f"Recommendation age: {recommendation_age}")
+                    print("*"*50)
+                    # Create the Article object as before
                     article_object = Article(
                     uuid=article_data.get('uuid', article_id),
                     byline=article_data.get('byline', []),
@@ -208,6 +220,8 @@ class ArticleRecommendationFacade:
                     recommendation_similarity=recommendation_similarity,
                     recommendation_llm_rating=recommendation_llm_rating,
                         )
+                    # Attach the computed human-readable recommendation age to the recommended article object
+                    article_object.recommendation_age = recommendation_age
                     results.append(article_object)
 
         self.recommendation_cache[article_id] = results # Cache
