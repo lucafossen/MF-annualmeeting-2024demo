@@ -78,7 +78,9 @@ body {
 
 .main-article-item img {
     width: 50%;
-    height: auto;
+    aspect-ratio: 1.5 / 1;
+    object-fit: cover;
+    /* height: auto; */
 }
 
 .btn {
@@ -152,6 +154,12 @@ body {
     color: #333;
     font-weight: bold;
     margin: 0;
+}
+
+.recommendation-age {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
 }
 
 .recommendation-title:hover {
