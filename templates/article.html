@@ -328,6 +328,23 @@
             updateSusButton();
         });
     </script>
+    {% if use_predetermined_flow %}
+        <!-- Inline variables for predetermined navigation -->
+        <script>
+            console.log("Using predetermined navigation flow");
+            // List of predetermined article IDs
+            // The first item here should be copied in the backend
+            var predeterminedArticles = ["TV2-15394074", "TV2-15377792", "TV2-15376624", "TV2-15369926", "TV2-15368102"];
+            // Find the index of the current article using its uuid
+            var currentIndex = predeterminedArticles.indexOf("{{ article['uuid'] }}");
+        </script>
+        <!-- Load additional JS file for navigation enhancements -->
+        <script src="{{ url_for('static', filename='predetermined.js') }}"></script>
+    {% else %}
+        <script>
+            console.log("Not using predetermined navigation flow");
+        </script>
+    {% endif %}
 </body>
 
 </html>
