@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, redirect, url_for, request, jsonify, session
 from utils import ArticleRecommendationFacade, dump_db_jsonl
 import uuid
 from db import mongo
@@ -18,6 +18,9 @@ app.secret_key = os.getenv('EXPERT_STUDY_SECRET_KEY')
 
 # MongoDB configuration
 app.config["MONGO_URI"] = os.getenv('MONGODB_URI')
+
+# Use predetermined flow for the expert study
+app.config['USE_PREDETERMINED_FLOW'] = True
 
 # Initialize PyMongo
 mongo.init_app(app)
@@ -41,6 +44,15 @@ def home():
 
     return render_template('home.html', articles=articles_list)
 
+# New endpoint to start the predetermined flow
+@app.route('/start-predetermined')
+def start_predetermined():
+    # set a session flag so that predetermined flow is active
+    app.config['USE_PREDETERMINED_FLOW'] = True
+    # Redirect to the first predetermined article. Change if necessary.
+    first_article = "TV2-15394074"
+    return article_recommendations(first_article)
+
 @app.route('/article/<string:article_id>')
 def article_recommendations(article_id):
     result = facade.get_article(article_id)
@@ -51,7 +63,7 @@ def article_recommendations(article_id):
     missed_article_ids = related_articles - recommended_articles
     missed_articles = [facade.get_article(aid) for aid in missed_article_ids]
 
-    return render_template('article.html', article=result, recommendations=recommendations, missed_articles=missed_articles)
+    return render_template('article.html', article=result, recommendations=recommendations, missed_articles=missed_articles, use_predetermined_flow=app.config['USE_PREDETERMINED_FLOW'])
 
 @app.route('/recommendation/<string:article_id>/<string:recommendation_id>')
 def recommendation(article_id, recommendation_id):
