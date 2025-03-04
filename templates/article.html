@@ -127,6 +127,51 @@
         .overlay-content button:hover {
             background-color: #005fa3;
         }
+
+        /* Container for the help icon and tooltip */
+        #help-icon-container {
+            position: relative;
+            float: left;
+            margin: 10px;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        /* Styling for the help icon */
+        #help-icon {
+            display: inline-block;
+            background-color: #007bff;
+            color: #fff;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Tooltip initially hidden */
+        #help-tooltip {
+            display: none;
+            position: absolute;
+            top: 100%; /* Positions the tooltip directly below the help icon container */
+            left: 0;   /* Can be adjusted for horizontal alignment */
+            margin-top: 5px; /* Provides some spacing between icon and tooltip */
+            background-color: #fff;
+            color: #333;
+            padding: 10px;
+            width: 400px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.15);
+            font-size: 14px;
+        }
+
+        /* Show tooltip on hover */
+        #help-icon-container:hover #help-tooltip {
+            display: block;
+        }
     </style>
 </head>
 
@@ -146,7 +191,7 @@
             </p>
             <ol>
                 <li>Hver side viser en nyhetssak samt AI-anbefalte artikler basert på den aktuelle artikkelen.</li><br>
-                <li>For hver artikkel, vurder hvor <b>relevant</b> den er er sammenlignet med den originale artikkelen. Vurder mellom 1 til 10, hvor <b>1</b> er <b>Helt irrelevant</b> og <b>10</b> er <b>Helt relevant</b>.</li><br>
+                <li>For hver anbefaling, vurder hvor <b>relevant</b> den er er sammenlignet med den originale artikkelen. Vurder mellom 1 til 10, hvor <b>1</b> er <b>Helt irrelevant</b> og <b>10</b> er <b>Helt relevant</b>.</li><br>
                 <li>Hvis du gir en lav score, er det til stor hjelp om du legger til en valgfri kommentar for å forklare!</li><br>
                 <li>Når du har minst <b>20</b> vurderinger, kan du gå videre til siste trinn (tar ca. 2 minutter) ved å klikke på "Gå til spørreskjema" knappen. Men du må gjerne å fortsette å vurdere artikler! Jo mer tilbakemelding vi får, jo bedre!</li><br>
             </ol>
@@ -154,6 +199,21 @@
         </div>
     </div>
     <div class="container">
+        <!-- Help Icon Container -->
+        <div id="help-icon-container">
+            <span id="help-icon">?</span>
+            <div id="help-tooltip">
+                <h3>
+                    Slik fullfører du undersøkelsen:
+                </h3>
+                <ol>
+                    <li>Hver side viser en nyhetssak samt AI-anbefalte artikler basert på den aktuelle artikkelen.</li><br>
+                    <li>For hver anbefaling, vurder hvor <b>relevant</b> den er er sammenlignet med den originale artikkelen. Vurder mellom 1 til 10, hvor <b>1</b> er <b>Helt irrelevant</b> og <b>10</b> er <b>Helt relevant</b>.</li><br>
+                    <li>Hvis du gir en lav score, er det til stor hjelp om du legger til en valgfri kommentar for å forklare!</li><br>
+                    <li>Når du har minst <b>20</b> vurderinger, kan du gå videre til siste trinn (tar ca. 2 minutter) ved å klikke på "Gå til spørreskjema" knappen. Men du må gjerne å fortsette å vurdere artikler! Jo mer tilbakemelding vi får, jo bedre!</li><br>
+                </ol>
+            </div>
+        </div>
         <div class="header">
             <a href="/" class="no-underline-link">
                 <h1>Undersøkelse: AI For Journalister</h1>
