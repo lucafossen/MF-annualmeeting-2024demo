@@ -226,7 +226,9 @@
             <img src="{{ article.image_url or 'https://via.placeholder.com/150' }}" alt="{{ article.title }}">
             <div class="main-article-content" >
                 <div>
-                    <h1 class="main-article-title">{{ article.title }}</h1>
+                    <a href="https://tv2.no/a/{{ article.uuid }}" target="_blank">
+                        <h1 class="main-article-title">{{ article.title }}</h1>
+                    </a>
                     <br>
                     <!-- <p class="article-byline">{{ article.byline | join(', ') }}</p> -->
                     <!-- <p class="article-metadata">Published on {{ article.creation_date }} in {{ article.section }}</p> -->
