@@ -30,7 +30,7 @@ def assign_session_id():
     if 'session_id' not in session:
         session['session_id'] = str(uuid.uuid4())
 
-@app.route('/')
+@app.route('/catalogue')
 def home():
     # Convert creation_date to a proper datetime type
     facade.testset_articles_df['creation_date'] = pd.to_datetime(
@@ -45,13 +45,13 @@ def home():
     return render_template('home.html', articles=articles_list)
 
 # New endpoint to start the predetermined flow
-@app.route('/start-predetermined')
+@app.route('/')
 def start_predetermined():
-    # set a session flag so that predetermined flow is active
+    # set a session flag so that predetermined flow is active (Shows prev/next buttons on relevant articles)
     app.config['USE_PREDETERMINED_FLOW'] = True
     # Redirect to the first predetermined article. Change if necessary.
     first_article = "TV2-15394074"
-    return article_recommendations(first_article)
+    return redirect(url_for('article_recommendations', article_id=first_article))
 
 @app.route('/article/<string:article_id>')
 def article_recommendations(article_id):
