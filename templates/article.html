@@ -253,32 +253,20 @@
                     document.getElementById('instructionsOverlay').style.display = 'block';
                 }
             });
-
-        function hideOverlay() {
-            document.getElementById('instructionsOverlay').style.display = 'none';
-            localStorage.setItem('shownOverlay', 'true');
-        }
-
-        var ratingThreshold = 5;
-        document.addEventListener('DOMContentLoaded', function () {
-            const susButton = document.getElementById('susButton');
-            const submitAllButton = document.getElementById('submitAll');
+        // Move the startHintTimer function to global scope so it can be accessed by hideOverlay()
+        function startHintTimer() {
             const scrollHint = document.getElementById('scrollHint');
-
-            // Check localStorage flag for the hint
             const hintAlreadyShown = localStorage.getItem('scrollHintShown');
 
             function hasScrolledSmallArticles() {
                 const smallArticlesSection = document.querySelector('.small-articles-section');
                 if (smallArticlesSection) {
                     const rect = smallArticlesSection.getBoundingClientRect();
-                    if (rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)) {
-                        return true;
-                    }
+                    return rect.bottom <= (window.innerHeight || document.documentElement.clientHeight);
                 }
                 return false;
             }
-            // Only set up the hint if the flag is not set
+
             if (!hintAlreadyShown) {
                 // After 5 seconds, if the user hasn't scrolled yet, show the hint.
                 const hintTimeout = setTimeout(() => {
@@ -297,6 +285,21 @@
                 }
                 window.addEventListener('scroll', onUserScroll);
             }
+        }
+
+        function hideOverlay() {
+            document.getElementById('instructionsOverlay').style.display = 'none';
+            localStorage.setItem('shownOverlay', 'true');
+
+            // Start the hint timer after the overlay is closed
+            startHintTimer();
+        }
+
+        var ratingThreshold = 5;
+        document.addEventListener('DOMContentLoaded', function () {
+            const susButton = document.getElementById('susButton');
+            const submitAllButton = document.getElementById('submitAll');
+
             submitAllButton.addEventListener('click', function (event) {
                 event.preventDefault();
 
@@ -349,7 +352,6 @@
                 });
 
                 // Reset the fields
-                    // Start of Selection
                     recommendations.forEach((recItem) => {
                         const ratingSelect = recItem.querySelector('.rating-input');
                         const commentField = recItem.querySelector('.feedback-comment');
