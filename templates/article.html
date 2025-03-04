@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>{{ article.title }} - Recommendations</title>
+    <title>Spørreskjema: {{ article.title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
         .hidden {
@@ -134,32 +134,33 @@
     <!-- Scroll hint container -->
     <div id="scrollHint" class="scroll-hint">
         <span class="arrow">&#8675;</span>
-        <span>Scroll down to rate AI recommendations</span>
+        <span>Bla ned for å vurdere AI-anbefalinger</span>
     </div>
     <!-- Overlay (hidden on subsequent visits) -->
     <div id="instructionsOverlay">
         <div class="overlay-content">
-            <h2>Welcome!</h2>
-            <p>We are researchers from MediaFutures, and are trying out a new method of recommending <b>related articles</b> for journalists and editors. You'll be using this survey to provide feedback on the quality of these recommendations</p>
+            <h2>Velkommen!</h2>
+            <p>Vi er forskere fra MediaFutures, og vi prøver ut en ny metode for å anbefale <b>relaterte artikler</b> for journalister og redaktører. Du kommer til å gi oss ordentlig verdifull tilbakemelding på kvaliteten av disse anbefalingene.</p>
             <p>
-                Here's how to complete the survey:
+                Slik fullfører du undersøkelsen:
             </p>
             <ol>
-                <li>Click any article listed on this page. A new page will open along with related article recommendations.</li><br>
-                <li>On that page, rate how <b>relevant</b> each recommended article is compared to the original article. Rate between 1 to 10, with <b>1</b> being <b>Totally irrelevant</b> and <b>10</b> being <b>Totally relevant</b></li><br>
-                <li>Once you have at least <b>twenty</b> ratings, a “Proceed to questionnaire” button will appear. Click it to complete the usability survey.</li><br>
+                <li>Hver side viser en nyhetssak samt AI-anbefalte artikler basert på den aktuelle artikkelen.</li><br>
+                <li>For hver artikkel, vurder hvor <b>relevant</b> den er er sammenlignet med den originale artikkelen. Vurder mellom 1 til 10, hvor <b>1</b> er <b>Helt irrelevant</b> og <b>10</b> er <b>Helt relevant</b>.</li><br>
+                <li>Hvis du gir en lav score, er det til stor hjelp om du legger til en valgfri kommentar for å forklare!</li><br>
+                <li>Når du har minst <b>20</b> vurderinger, kan du gå videre til siste trinn (tar ca. 2 minutter) ved å klikke på "Gå til spørreskjema" knappen. Men du må gjerne å fortsette å vurdere artikler! Jo mer tilbakemelding vi får, jo bedre!</li><br>
             </ol>
-            <button onclick="hideOverlay()">Understood</button>
+            <button onclick="hideOverlay()">Forstått</button>
         </div>
     </div>
     <div class="container">
         <div class="header">
             <a href="/" class="no-underline-link">
-                <h1>AI supporting Journalists</h1>
-                <p>Tool for journalists and editors - Helping them find related articles to their story</p>
+                <h1>Undersøkelse: AI For Journalister</h1>
+                <!-- <p>Verktøy for journalister og redaktører - Hjelper dem med å finne relaterte artikler til deres historie</p> -->
             </a>
         </div>
-        <h2>Main article:</h2>
+        <h2>Hovedartikkel:</h2>
 
         <div class="main-article-item" style="display: flex; align-items: flex-start;">
             <img src="{{ article.image_url or 'https://via.placeholder.com/150' }}" alt="{{ article.title }}">
@@ -173,7 +174,7 @@
                     <div class="article-full-text">
                         <!-- Just showing the first 400 chars for now -->
                         {{ article.body_text[:400]+"..." | safe }} <a href="https://tv2.no/a/{{ article.uuid }}"
-                            target="_blank">Read more (opens in new tab)</a>
+                            target="_blank">Les mer (åpnes i ny fane)</a>
                     </div>
                 </div>
             </div>
@@ -182,7 +183,7 @@
         <!-- Wrap the main content in a container to control coloring -->
         <div id="main-content">
             <div class="small-articles-section">
-                <h2>AI Recommendations for Related Articles:</h2>
+                <h2>AI-anbefalinger for relaterte artikler:</h2>
                 <ul class="small-articles">
                     {% for rec in recommendations %}
                     <li class="recommendation-item normal-recommendation">
@@ -194,15 +195,15 @@
                             </div>
                         </a>
 
-                        <span class="recommendation-age">Published {{ rec.recommendation_age }} earlier than original</span>
+                        <span class="recommendation-age">{{ rec.recommendation_age.capitalize() }} eldre enn original</span>
                         <span class="recommendation-lead-text">{{ rec.lead_text }}</span>
 
                         <div class="feedback-section" style="background-color: #363a3c;">
                         <br>
-                            <label for="rating-{{ rec.uuid }}" style="color: #effeff;">Rate (1–10):</label>
+                            <label for="rating-{{ rec.uuid }}" style="color: #effeff;">Vurder (1–10):</label>
                             <select class="rating-input" id="rating-{{ rec.uuid }}" data-article-id="{{ article.uuid }}"
                                 data-rec-id="{{ rec.uuid }}">
-                                <option value="">-- Select --</option>
+                                <option value="">-- Velg --</option>
                                     // Start of Selection
                                     {% for i in range(1, 11) %}
                                         {% if i == 1 %}
@@ -221,32 +222,32 @@
                             <br>
                             <br>
 
-                            <label for="feedback-comment-{{ rec.uuid }}" style="color: #effeff;"">Comment:</label>
+                            <label for="feedback-comment-{{ rec.uuid }}" style="color: #effeff;"">Kommentar:</label>
                             <textarea class="feedback-comment" id="feedback-comment-{{ rec.uuid }}"
                                 data-article-id="{{ article.uuid }}" data-rec-id="{{ rec.uuid }}"
-                                placeholder="Your thoughts... (optional)"></textarea>
+                                placeholder="Dine tanker... (valgfritt)"></textarea>
                             <br>
                             <br>
                         </div>
                     </li>
                     {% else %}
-                    <li>No recommendations available for this article.</li>
+                    <li>Ingen anbefalinger funnet.</li>
                     {% endfor %}
                 </ul>
             </div>
         </div>
 
         <!-- Single button to submit all feedback at once -->
-        <button id="submitAll" class="btn">Submit feedback</button>
+        <button id="submitAll" class="btn">Send inn vurdering</button>
 
         <!-- Display rating status -->
         <p id="ratingStatus"></p>
 
         <button id="susButton" class="btn" disabled style="background-color: #d3d3d3; cursor: not-allowed;">
-            Proceed to questionnaire
+            Fortsett til spørreskjema
         </button>
 
-        <a href="{{ url_for('home') }}" class="back-link">Back to Home</a>
+        <!-- <a href="{{ url_for('home') }}" class="back-link">Back to Home</a> -->
     </div>
 
     <script>
@@ -375,20 +376,20 @@
                         const count = data.count || 0;
 
                         if (count >= ratingThreshold) {
-                            ratingStatus.innerText = `Great job! You have rated ${count} articles. Feel free to continue rating, or proceed to the questionnaire.`;
+                            ratingStatus.innerText = `Tusen takk! Du har vurdert ${count} artikler. Fortsett gjerne å vurdere, eller gå videre til spørreskjemaet.`;
                             susButton.disabled = false;
                             susButton.style.backgroundColor = '#00b613';
                             susButton.style.cursor = 'pointer';
-                            susButton.innerText = `Proceed to questionnaire`;
+                            susButton.innerText = `Gå videre til spørreskjemaet`;
                             susButton.addEventListener('click', () => {
                                 window.location.href = '/sus';
                             });
                         } else {
-                            susButton.innerText = `Please rate ${ratingThreshold - count} more to unlock questionnaire`;
+                            susButton.innerText = `Vennligst vurder ${ratingThreshold - count} til for å låse opp spørreskjemaet`;
                         }
                     })
                     .catch(error => {
-                        console.error('Unable to fetch rating count:', error);
+                        console.error('Kan ikke hente vurderingstelling:', error);
                     });
             }
 

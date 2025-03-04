@@ -192,6 +192,7 @@ class ArticleRecommendationFacade:
                     rec_creation_date = pd.to_datetime(article_data.get('creation_date', ''), errors='coerce')
                     recommendation_age = None
                     if original_creation_date is not pd.NaT and rec_creation_date is not pd.NaT:
+                        humanize.i18n.activate("nb_NO") # For some reason this doesn't work when called right after importing
                         delta = rec_creation_date - original_creation_date
                         recommendation_age = humanize.naturaldelta(delta.to_pytimedelta())
                     print(f"Recommendation age: {recommendation_age}")
