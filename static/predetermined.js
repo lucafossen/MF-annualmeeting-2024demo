@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Create Previous Button
     var prevButton = document.createElement('button');
-    prevButton.textContent = 'Previous';
+    prevButton.textContent = 'Forrige';
     prevButton.className = 'btn';
     prevButton.style.position = 'fixed';
     prevButton.style.left = '10px';
@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Create Next Button
     var nextButton = document.createElement('button');
-    nextButton.textContent = 'Next';
+    nextButton.textContent = 'Neste';
     nextButton.className = 'btn';
     nextButton.style.position = 'fixed';
     nextButton.style.right = '10px';
