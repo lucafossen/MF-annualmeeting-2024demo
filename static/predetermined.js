@@ -1,5 +1,6 @@
 // static/predetermined.js
 
+// ... existing code ...
 document.addEventListener('DOMContentLoaded', function () {
     // Create a container div for navigation if it doesn't exist
     var navContainer = document.getElementById('navigation-buttons');
@@ -19,7 +20,10 @@ document.addEventListener('DOMContentLoaded', function () {
     prevButton.style.left = '10px';
     prevButton.style.top = '50%';
     prevButton.style.transform = 'translateY(-50%)';
-    prevButton.disabled = (currentIndex <= 0); // Disable if at the first article
+    // Hide button when at first index
+    if (currentIndex <= 0) {
+        prevButton.style.display = 'none';
+    }
     document.body.appendChild(prevButton);
 
     // Create Next Button
@@ -30,23 +34,16 @@ document.addEventListener('DOMContentLoaded', function () {
     nextButton.style.right = '10px';
     nextButton.style.top = '50%';
     nextButton.style.transform = 'translateY(-50%)';
-    nextButton.disabled = (currentIndex === -1 || currentIndex >= predeterminedArticles.length - 1);
+    // Hide the next button if at the last index
+    if (currentIndex === -1 || currentIndex >= predeterminedArticles.length - 1) {
+        nextButton.style.display = 'none';
+    }
     document.body.appendChild(nextButton);
-
-    // Optionally, create a Finish button if at the end of the list
-    var finishButton = document.createElement('button');
-    finishButton.textContent = 'Finish';
-    finishButton.className = 'btn';
-    finishButton.style.marginLeft = '20px';
-    finishButton.style.display = (currentIndex === predeterminedArticles.length - 1) ? 'inline-block' : 'none';
-    navContainer.appendChild(finishButton);
 
     // Event listener for Previous
     prevButton.addEventListener('click', function () {
         if (currentIndex > 0) {
             var prevArticleId = predeterminedArticles[currentIndex - 1];
-            // Redirect to the article details page for the previous article.
-            // Adjust the URL pattern according to your route structure.
             window.location.href = '/article/' + prevArticleId;
         }
     });
@@ -59,9 +56,4 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Event listener for Finish
-    finishButton.addEventListener('click', function () {
-        // Redirect to a finish page or back to the home page as desired.
-        window.location.href = '/';
-    });
 });

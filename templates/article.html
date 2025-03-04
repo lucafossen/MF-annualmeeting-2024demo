@@ -239,6 +239,9 @@
         <!-- Single button to submit all feedback at once -->
         <button id="submitAll" class="btn">Submit feedback</button>
 
+        <!-- Display rating status -->
+        <p id="ratingStatus"></p>
+
         <button id="susButton" class="btn" disabled style="background-color: #d3d3d3; cursor: not-allowed;">
             Proceed to questionnaire
         </button>
@@ -299,6 +302,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             const susButton = document.getElementById('susButton');
             const submitAllButton = document.getElementById('submitAll');
+            const ratingStatus = document.getElementById('ratingStatus');
 
             submitAllButton.addEventListener('click', function (event) {
                 event.preventDefault();
@@ -371,6 +375,7 @@
                         const count = data.count || 0;
 
                         if (count >= ratingThreshold) {
+                            ratingStatus.innerText = `Great job! You have rated ${count} articles. Feel free to continue rating, or proceed to the questionnaire.`;
                             susButton.disabled = false;
                             susButton.style.backgroundColor = '#00b613';
                             susButton.style.cursor = 'pointer';
