@@ -400,9 +400,8 @@
         <!-- Inline variables for predetermined navigation -->
         <script>
             console.log("Using predetermined navigation flow");
-            // List of predetermined article IDs
-            // The first item here should be copied in the backend
-            var predeterminedArticles = ["TV2-15394074", "TV2-15377792", "TV2-15376624", "TV2-15369926", "TV2-15368102"];
+            // Use the server-generated list passed as a variable
+            var predeterminedArticles = {{ predetermined_articles|tojson }};  // {{ edit_7 }}
             // Find the index of the current article using its uuid
             var currentIndex = predeterminedArticles.indexOf("{{ article['uuid'] }}");
         </script>
