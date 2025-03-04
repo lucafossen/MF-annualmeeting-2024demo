@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime, timezone
 import pandas as pd
+import random
 
 app = Flask(__name__)
 
@@ -47,23 +48,41 @@ def home():
 # New endpoint to start the predetermined flow
 @app.route('/')
 def start_predetermined():
-    # set a session flag so that predetermined flow is active (Shows prev/next buttons on relevant articles)
     app.config['USE_PREDETERMINED_FLOW'] = True
-    # Redirect to the first predetermined article. Change if necessary.
-    first_article = "TV2-15394074"
+    # Generate the predetermined articles list once per session
+    if 'predetermined_articles' not in session:
+        # Get all article uuids from the testset articles DataFrame
+        articles = facade.testset_articles_df['uuid'].tolist()
+        session_id = session.get('session_id')
+        # Seed the random generator with a hash of the session_id
+        seed = hash(session_id)  # {{ edit_2 }}
+        random.Random(seed).shuffle(articles)  # {{ edit_3 }}
+        session['predetermined_articles'] = articles  # {{ edit_4 }}
+
+    predetermined_articles = session['predetermined_articles']
+    first_article = predetermined_articles[0] if predetermined_articles else None
     return redirect(url_for('article_recommendations', article_id=first_article))
 
 @app.route('/article/<string:article_id>')
 def article_recommendations(article_id):
     result = facade.get_article(article_id)
     recommendations = facade.get_recommendations(article_id)
-
     related_articles = set(result.cleaned_related_articles)
     recommended_articles = set(rec.uuid for rec in recommendations)
     missed_article_ids = related_articles - recommended_articles
     missed_articles = [facade.get_article(aid) for aid in missed_article_ids]
 
-    return render_template('article.html', article=result, recommendations=recommendations, missed_articles=missed_articles, use_predetermined_flow=app.config['USE_PREDETERMINED_FLOW'])
+    # Retrieve the predetermined list from the session
+    predetermined_articles = session.get('predetermined_articles', [])
+
+    return render_template(
+        'article.html',
+        article=result,
+        recommendations=recommendations,
+        missed_articles=missed_articles,
+        use_predetermined_flow=app.config['USE_PREDETERMINED_FLOW'],
+        predetermined_articles=predetermined_articles
+    )
 
 @app.route('/recommendation/<string:article_id>/<string:recommendation_id>')
 def recommendation(article_id, recommendation_id):
