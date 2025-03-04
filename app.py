@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session
+from flask import Flask, render_template, redirect, url_for, request, jsonify, session
 from utils import ArticleRecommendationFacade, dump_db_jsonl
 import uuid
 from db import mongo
@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 import os
 from datetime import datetime, timezone
 import pandas as pd
+import random
 
 app = Flask(__name__)
 
@@ -19,6 +20,9 @@ app.secret_key = os.getenv('EXPERT_STUDY_SECRET_KEY')
 # MongoDB configuration
 app.config["MONGO_URI"] = os.getenv('MONGODB_URI')
 
+# Use predetermined flow for the expert study
+app.config['USE_PREDETERMINED_FLOW'] = True
+
 # Initialize PyMongo
 mongo.init_app(app)
 
@@ -27,7 +31,7 @@ def assign_session_id():
     if 'session_id' not in session:
         session['session_id'] = str(uuid.uuid4())
 
-@app.route('/')
+@app.route('/catalogue')
 def home():
     # Convert creation_date to a proper datetime type
     facade.testset_articles_df['creation_date'] = pd.to_datetime(
@@ -41,17 +45,44 @@ def home():
 
     return render_template('home.html', articles=articles_list)
 
+# New endpoint to start the predetermined flow
+@app.route('/')
+def start_predetermined():
+    app.config['USE_PREDETERMINED_FLOW'] = True
+    # Generate the predetermined articles list once per session
+    if 'predetermined_articles' not in session:
+        # Get all article uuids from the testset articles DataFrame
+        articles = facade.testset_articles_df['uuid'].tolist()
+        session_id = session.get('session_id')
+        # Seed the random generator with a hash of the session_id
+        seed = hash(session_id)  # {{ edit_2 }}
+        random.Random(seed).shuffle(articles)  # {{ edit_3 }}
+        session['predetermined_articles'] = articles  # {{ edit_4 }}
+
+    predetermined_articles = session['predetermined_articles']
+    first_article = predetermined_articles[0] if predetermined_articles else None
+    return redirect(url_for('article_recommendations', article_id=first_article))
+
 @app.route('/article/<string:article_id>')
 def article_recommendations(article_id):
     result = facade.get_article(article_id)
     recommendations = facade.get_recommendations(article_id)
-
     related_articles = set(result.cleaned_related_articles)
     recommended_articles = set(rec.uuid for rec in recommendations)
     missed_article_ids = related_articles - recommended_articles
     missed_articles = [facade.get_article(aid) for aid in missed_article_ids]
 
-    return render_template('article.html', article=result, recommendations=recommendations, missed_articles=missed_articles)
+    # Retrieve the predetermined list from the session
+    predetermined_articles = session.get('predetermined_articles', [])
+
+    return render_template(
+        'article.html',
+        article=result,
+        recommendations=recommendations,
+        missed_articles=missed_articles,
+        use_predetermined_flow=app.config['USE_PREDETERMINED_FLOW'],
+        predetermined_articles=predetermined_articles
+    )
 
 @app.route('/recommendation/<string:article_id>/<string:recommendation_id>')
 def recommendation(article_id, recommendation_id):

@@ -94,6 +94,39 @@
             font-size: 24px;
             margin-right: 8px;
         }
+        /* Overlay styling */
+        #instructionsOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none; /* hidden by default */
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+        }
+        .overlay-content {
+            background-color: #fff;
+            width: 80%;
+            max-width: 600px;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+        }
+        .overlay-content button {
+            display: inline-block;
+            margin-top: 20px;
+            background-color: #0077cc;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .overlay-content button:hover {
+            background-color: #005fa3;
+        }
     </style>
 </head>
 
@@ -102,6 +135,22 @@
     <div id="scrollHint" class="scroll-hint">
         <span class="arrow">&#8675;</span>
         <span>Scroll down to rate AI recommendations</span>
+    </div>
+    <!-- Overlay (hidden on subsequent visits) -->
+    <div id="instructionsOverlay">
+        <div class="overlay-content">
+            <h2>Welcome!</h2>
+            <p>We are researchers from MediaFutures, and are trying out a new method of recommending <b>related articles</b> for journalists and editors. You'll be using this survey to provide feedback on the quality of these recommendations</p>
+            <p>
+                Here's how to complete the survey:
+            </p>
+            <ol>
+                <li>Click any article listed on this page. A new page will open along with related article recommendations.</li><br>
+                <li>On that page, rate how <b>relevant</b> each recommended article is compared to the original article. Rate between 1 to 10, with <b>1</b> being <b>Totally irrelevant</b> and <b>10</b> being <b>Totally relevant</b></li><br>
+                <li>Once you have at least <b>five</b> ratings, a “Proceed to questionnaire” button will appear. Click it to complete the usability survey.</li><br>
+            </ol>
+            <button onclick="hideOverlay()">Understood</button>
+        </div>
     </div>
     <div class="container">
         <div class="header">
@@ -190,6 +239,9 @@
         <!-- Single button to submit all feedback at once -->
         <button id="submitAll" class="btn">Submit feedback</button>
 
+        <!-- Display rating status -->
+        <p id="ratingStatus"></p>
+
         <button id="susButton" class="btn" disabled style="background-color: #d3d3d3; cursor: not-allowed;">
             Proceed to questionnaire
         </button>
@@ -198,26 +250,26 @@
     </div>
 
     <script>
-        var ratingThreshold = 5; // already defined
-        document.addEventListener('DOMContentLoaded', function () {
-            const susButton = document.getElementById('susButton');
-            const submitAllButton = document.getElementById('submitAll');
+        // Show overlay on the first visit
+        window.addEventListener('load', () => {
+                if (!localStorage.getItem('shownOverlay')) {
+                    document.getElementById('instructionsOverlay').style.display = 'block';
+                }
+            });
+        // Move the startHintTimer function to global scope so it can be accessed by hideOverlay()
+        function startHintTimer() {
             const scrollHint = document.getElementById('scrollHint');
-
-            // Check localStorage flag for the hint
             const hintAlreadyShown = localStorage.getItem('scrollHintShown');
 
             function hasScrolledSmallArticles() {
                 const smallArticlesSection = document.querySelector('.small-articles-section');
                 if (smallArticlesSection) {
                     const rect = smallArticlesSection.getBoundingClientRect();
-                    if (rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)) {
-                        return true;
-                    }
+                    return rect.bottom <= (window.innerHeight || document.documentElement.clientHeight);
                 }
                 return false;
             }
-            // Only set up the hint if the flag is not set
+
             if (!hintAlreadyShown) {
                 // After 5 seconds, if the user hasn't scrolled yet, show the hint.
                 const hintTimeout = setTimeout(() => {
@@ -236,6 +288,22 @@
                 }
                 window.addEventListener('scroll', onUserScroll);
             }
+        }
+
+        function hideOverlay() {
+            document.getElementById('instructionsOverlay').style.display = 'none';
+            localStorage.setItem('shownOverlay', 'true');
+
+            // Start the hint timer after the overlay is closed
+            startHintTimer();
+        }
+
+        var ratingThreshold = 5;
+        document.addEventListener('DOMContentLoaded', function () {
+            const susButton = document.getElementById('susButton');
+            const submitAllButton = document.getElementById('submitAll');
+            const ratingStatus = document.getElementById('ratingStatus');
+
             submitAllButton.addEventListener('click', function (event) {
                 event.preventDefault();
 
@@ -288,7 +356,6 @@
                 });
 
                 // Reset the fields
-                    // Start of Selection
                     recommendations.forEach((recItem) => {
                         const ratingSelect = recItem.querySelector('.rating-input');
                         const commentField = recItem.querySelector('.feedback-comment');
@@ -308,6 +375,7 @@
                         const count = data.count || 0;
 
                         if (count >= ratingThreshold) {
+                            ratingStatus.innerText = `Great job! You have rated ${count} articles. Feel free to continue rating, or proceed to the questionnaire.`;
                             susButton.disabled = false;
                             susButton.style.backgroundColor = '#00b613';
                             susButton.style.cursor = 'pointer';
@@ -328,6 +396,22 @@
             updateSusButton();
         });
     </script>
+    {% if use_predetermined_flow %}
+        <!-- Inline variables for predetermined navigation -->
+        <script>
+            console.log("Using predetermined navigation flow");
+            // Use the server-generated list passed as a variable
+            var predeterminedArticles = {{ predetermined_articles|tojson }};  // {{ edit_7 }}
+            // Find the index of the current article using its uuid
+            var currentIndex = predeterminedArticles.indexOf("{{ article['uuid'] }}");
+        </script>
+        <!-- Load additional JS file for navigation enhancements -->
+        <script src="{{ url_for('static', filename='predetermined.js') }}"></script>
+    {% else %}
+        <script>
+            console.log("Not using predetermined navigation flow");
+        </script>
+    {% endif %}
 </body>
 
 </html>
