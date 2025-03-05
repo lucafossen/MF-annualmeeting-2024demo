@@ -176,15 +176,15 @@ class ArticleRecommendationFacade:
             related_articles_field = original_article_row.iloc[0]['recommendations']
             if related_articles_field:
                 # Loop through the related articles of the original article
-                for article_id in related_articles_field:
-                    recommended_article_row = self.big_articles_df[self.big_articles_df['uuid'] == article_id]
+                for rec_article_id in related_articles_field:
+                    recommended_article_row = self.big_articles_df[self.big_articles_df['uuid'] == rec_article_id]
                     if recommended_article_row.empty:
                         article_data = {}
                     else:
                         article_data = recommended_article_row.iloc[0].to_dict()
                     # Get the specific recommendation details for the recommendation
                     for result in original_article_row.iloc[0]['recommendations results']:
-                        if result[2] == article_id:
+                        if result[2] == rec_article_id:
                             recommendation_llm_rating = result[0]
                             recommendation_similarity = int(round(result[3], 2)*100) # turn into percentage
                             recommendation_explanation = result[5]
@@ -199,9 +199,9 @@ class ArticleRecommendationFacade:
                     print("*"*50)
                     # Create the Article object as before
                     article_object = Article(
-                    uuid=article_data.get('uuid', article_id),
+                    uuid=article_data.get('uuid', rec_article_id),
                     byline=article_data.get('byline', []),
-                    title=article_data.get('title', f'Article {article_id} Not Found'),
+                    title=article_data.get('title', f'Article {rec_article_id} Not Found'),
                     lead_text=article_data.get('lead_text', ''),
                     creation_date=pd.to_datetime(article_data.get('creation_date', ''), errors='coerce'),
                     last_modified=pd.to_datetime(article_data.get('last_modified', ''), errors='coerce'),
