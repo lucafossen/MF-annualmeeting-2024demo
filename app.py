@@ -36,24 +36,10 @@ def compute_progress(doc, predetermined_articles, article_id):
     """
     start_time = time.time()  # Start timing
 
-    # 1. Pre-fetch ALL articles and recommendations in a single pass to drastically reduce overhead
-    # articles_map = {}
-    # recommendations_map = {}
-    # for article_uuid in predetermined_articles:
-    #     article_obj = facade.get_article(article_uuid)
-    #     if article_obj:
-    #         articles_map[article_uuid] = article_obj
-    #         recommendations_map[article_uuid] = facade.get_recommendations(article_uuid)
-
     progress_list = []
 
-    # 2. Determine progress state for each article
+    # 1. Determine progress state for each article
     for article_uuid in predetermined_articles:
-        # article = articles_map.get(article_uuid)
-        # if not article:
-        #     # Could not load article (missing or invalid ID);
-        #     # skip to avoid KeyErrors later
-        #     continue
 
         # Feedback for this article
         feedback_for_article = {}
@@ -76,13 +62,13 @@ def compute_progress(doc, predetermined_articles, article_id):
             "progress": state
         })
 
-    # 3. Find the last rated (partial or full) article's index
+    # 2. Find the last rated (partial or full) article's index
     last_rated_index = -1
     for i, article_info in enumerate(progress_list):
         if article_info["progress"] in ["partial", "full"]:
             last_rated_index = i
 
-    # 4. Determine how many articles to return
+    # 3. Determine how many articles to return
     if last_rated_index == -1:
         # No articles are rated yet, so just show the first 10
         max_index = min(9, len(progress_list) - 1)
@@ -96,7 +82,7 @@ def compute_progress(doc, predetermined_articles, article_id):
             # If the current article is beyond the max_index, set max_index to the current article index
             max_index = article_index
 
-    # 5. Slice the progress_list to keep only what we need to display
+    # 4. Slice the progress_list to keep only what we need to display
     subset_to_display = progress_list[:max_index + 1]
 
     end_time = time.time()  # End timing
