@@ -13,7 +13,7 @@
                 <a
                     href="{{ url_for('article_recommendations', article_id=article.uuid) }}"
                     class="progress-square"
-                    title="{{ 'Partially rated:' if article.progress == 'partial' else 'Fully rated:' if article.progress == 'full' else 'Not rated:' }} {{ article.title }}"
+                    title="{{ 'Delvis ferdig:' if article.progress == 'partial' else 'Ferdig:' if article.progress == 'full' else 'Uferdig:' }} {{ article.title }}"
                     style="background-color: {{ color }};"
                 >
                     <span style="color: #555555; display: flex; justify-content: center; align-items: center; height: 100%;">{{ loop.index }}</span>
