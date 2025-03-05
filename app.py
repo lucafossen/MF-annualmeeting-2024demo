@@ -26,6 +26,46 @@ app.config['USE_PREDETERMINED_FLOW'] = True
 # Initialize PyMongo
 mongo.init_app(app)
 
+# Helper function to compute data for progress bar
+def compute_progress(doc, predetermined_articles):
+    """
+    Build a list of articles (in the order of predetermined_articles) with a 'progress' attribute:
+    'none', 'partial', or 'full', based on how many recommendations have been rated.
+    """
+    progress_list = []
+
+    for article_uuid in predetermined_articles:
+        # Retrieve the article metadata from your facade:
+        article = facade.get_article(article_uuid)
+        if not article:
+            # If for some reason the facade can't find this article, skip
+            continue
+
+        # Extract relevant info for the progress state
+        feedback_for_this_article = {}
+        if doc and "feedback" in doc and article_uuid in doc["feedback"]:
+            feedback_for_this_article = doc["feedback"][article_uuid]
+
+        recs_for_this_article = facade.get_recommendations(article_uuid)
+
+        total_recs = len(recs_for_this_article)
+        rated_count = len(feedback_for_this_article)
+
+        if rated_count == 0:
+            state = "none"
+        elif rated_count < total_recs:
+            state = "partial"
+        else:
+            state = "full"
+
+        progress_list.append({
+            "uuid": article_uuid,
+            "title": article.title,
+            "progress": state
+        })
+
+    return progress_list
+
 @app.before_request
 def assign_session_id():
     if 'session_id' not in session:
@@ -75,13 +115,20 @@ def article_recommendations(article_id):
     # Retrieve the predetermined list from the session
     predetermined_articles = session.get('predetermined_articles', [])
 
+    # Grab the feedback doc from the database
+    doc = mongo.db.feedback.find_one({"session_id": session.get('session_id')})
+
+    # Pass predetermined_articles to the updated compute_progress
+    progress = compute_progress(doc, predetermined_articles)
+
     return render_template(
         'article.html',
         article=result,
         recommendations=recommendations,
         missed_articles=missed_articles,
         use_predetermined_flow=app.config['USE_PREDETERMINED_FLOW'],
-        predetermined_articles=predetermined_articles
+        predetermined_articles=predetermined_articles,
+        progress=progress
     )
 
 @app.route('/recommendation/<string:article_id>/<string:recommendation_id>')
