@@ -34,12 +34,11 @@ body {
 
 /* Progress bar styles */
 .progress-bar-container {
-    /* margin: 15px 0; */
     padding: 10px;
-    /* background-color: rgb(16, 1, 24); */
-    /* border: 1px solid #ccc; */
-    /* border-radius: 5px; */
+    display: flex;
+    justify-content: center;
 }
+
 .progress-bar {
     display: flex;
     /* flex-wrap: wrap; let the squares wrap to a new line if we have many */

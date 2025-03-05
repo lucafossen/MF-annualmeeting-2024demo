@@ -2,17 +2,17 @@
     <div class="progress-bar-container">
         <div class="progress-bar">
             {% for article in articles %}
-                {% set color = "rgb(240, 240, 248)" %}
+                {% set color = "rgba(240, 248, 255, 0)" %}
                 {% if article.progress == "partial" %}
-                    {% set color = "#ffdf0f" %}
+                    {% set color = "rgb(220, 218, 235)" %}
                 {% elif article.progress == "full" %}
-                    {% set color = "green" %}
+                    {% set color = "rgb(178, 174, 255)" %}
                 {% endif %}
 
                 <a
                     href="{{ url_for('article_recommendations', article_id=article.uuid) }}"
                     class="progress-square"
-                    title="Article: {{ article.title }}"
+                    title="{{ 'Partially rated:' if article.progress == 'partial' else 'Fully rated:' if article.progress == 'full' else 'Not rated:' }} {{ article.title }}"
                     style="background-color: {{ color }};"
                 >
                     <!-- Optionally display an index or keep it empty -->

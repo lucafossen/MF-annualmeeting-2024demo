@@ -76,7 +76,7 @@
         /* New styles for the scroll hint */
         .scroll-hint {
             position: fixed;
-            top: 50%;
+            top: 40%;
             right: 20px;
             transform: translateY(-50%);
             background: rgba(0, 0, 0, 0.7);
@@ -178,6 +178,7 @@
 </head>
 
 <body>
+    <p style="text-align: center;">Rated articles:</p>
     {{ render_progress_bar(progress) }}
     <!-- Scroll hint container -->
     <div id="scrollHint" class="scroll-hint">
