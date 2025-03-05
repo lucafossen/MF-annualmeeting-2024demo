@@ -88,7 +88,7 @@ def compute_progress(doc, predetermined_articles, article_id):
     end_time = time.time()  # End timing
     print(f"compute_progress took {end_time - start_time:.4f} seconds")
 
-    return subset_to_display, article_index
+    return subset_to_display, last_rated_index, article_index
 
 @app.before_request
 def assign_session_id():
@@ -113,7 +113,8 @@ def home():
 @app.route('/')
 def start_predetermined():
     app.config['USE_PREDETERMINED_FLOW'] = True
-    # Generate the predetermined articles list once per session
+
+    # Generate the predetermined articles list once per session if not already set
     if 'predetermined_articles' not in session:
         # Get all article uuids from the testset articles DataFrame
         articles = facade.testset_articles_df['uuid'].tolist()
@@ -124,8 +125,27 @@ def start_predetermined():
         session['predetermined_articles'] = articles
 
     predetermined_articles = session['predetermined_articles']
-    first_article = predetermined_articles[0] if predetermined_articles else None
-    return redirect(url_for('article_recommendations', article_id=first_article))
+
+    if not predetermined_articles:
+        return "No articles available", 400
+
+    # Get the feedback doc for this session
+    doc = mongo.db.feedback.find_one({"session_id": session.get('session_id')})
+
+    # Reuse compute_progress to determine the last rated article
+    # We'll just pass the first article in predetermined_articles as 'article_id'
+    # so that compute_progress can return last_rated_index.
+    first_article = predetermined_articles[0]
+    _, last_rated_index, _ = compute_progress(doc, predetermined_articles, first_article)
+
+    # If no article is partially or fully rated, redirect to the first article;
+    # otherwise, redirect to the last partially/fully rated one.
+    if last_rated_index == -1:
+        article_to_load = first_article
+    else:
+        article_to_load = predetermined_articles[last_rated_index]
+
+    return redirect(url_for('article_recommendations', article_id=article_to_load))
 
 @app.route('/article/<string:article_id>')
 def article_recommendations(article_id):
@@ -143,7 +163,7 @@ def article_recommendations(article_id):
     doc = mongo.db.feedback.find_one({"session_id": session.get('session_id')})
 
     # Pass predetermined_articles to the updated compute_progress
-    progress, progress_index = compute_progress(doc, predetermined_articles, article_id)
+    progress, _, progress_index = compute_progress(doc, predetermined_articles, article_id)
     print(f"Progress index: {progress_index}, type: {type(progress_index)}")
     return render_template(
         'article.html',
