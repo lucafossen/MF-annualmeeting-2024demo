@@ -1,22 +1,30 @@
-{% macro render_progress_bar(articles) %}
+{% macro render_progress_bar(articles, progress_index) %}
 <p style="text-align: center;">Din oversikt:</p>
     <div class="progress-bar-container">
         <div class="progress-bar">
             {% for article in articles %}
-                {% set color = "rgba(240, 248, 255, 0)" %}
                 {% if article.progress == "partial" %}
                     {% set color = "rgb(220, 218, 235)" %}
                 {% elif article.progress == "full" %}
                     {% set color = "rgb(178, 174, 255)" %}
+                {% else %}
+                    {% set color = "rgba(240, 248, 255, 0)" %}
+                {% endif %}
+
+                {% if progress_index == loop.index - 1 %}
+                    {% set color = "rgb(255, 255, 200)" %}
+                    {% set bold = "font-size: large; font-weight: bold;" %}
+                {% else %}
+                    {% set bold = "" %}
                 {% endif %}
 
                 <a
                     href="{{ url_for('article_recommendations', article_id=article.uuid) }}"
                     class="progress-square"
-                    title="{{ 'Delvis ferdig:' if article.progress == 'partial' else 'Ferdig:' if article.progress == 'full' else 'Uferdig:' }} {{ article.title }}"
+                    title="Sak #{{ loop.index }}"
                     style="background-color: {{ color }};"
                 >
-                    <span style="color: #555555; display: flex; justify-content: center; align-items: center; height: 100%;">{{ loop.index }}</span>
+                    <span style="color: #555555; display: flex; justify-content: center; align-items: center; height: 100%; {{ bold }}">{{ loop.index }}</span>
                 </a>
             {% endfor %}
         </div>

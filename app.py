@@ -8,6 +8,7 @@ import os
 from datetime import datetime, timezone
 import pandas as pd
 import random
+import time
 
 app = Flask(__name__)
 
@@ -27,27 +28,40 @@ app.config['USE_PREDETERMINED_FLOW'] = True
 mongo.init_app(app)
 
 # Helper function to compute data for progress bar
-def compute_progress(doc, predetermined_articles):
+def compute_progress(doc, predetermined_articles, article_id):
     """
     Build a list of articles (in the order of predetermined_articles) with a 'progress' attribute:
     'none', 'partial', or 'full'.
     Then return only the subset of articles up to the last partial/full plus 10 more.
     """
+    start_time = time.time()  # Start timing
+
+    # 1. Pre-fetch ALL articles and recommendations in a single pass to drastically reduce overhead
+    # articles_map = {}
+    # recommendations_map = {}
+    # for article_uuid in predetermined_articles:
+    #     article_obj = facade.get_article(article_uuid)
+    #     if article_obj:
+    #         articles_map[article_uuid] = article_obj
+    #         recommendations_map[article_uuid] = facade.get_recommendations(article_uuid)
+
     progress_list = []
 
-    # --- 1. Determine the progress state for each article ---
+    # 2. Determine progress state for each article
     for article_uuid in predetermined_articles:
-        article = facade.get_article(article_uuid)
-        if not article:
-            continue
+        # article = articles_map.get(article_uuid)
+        # if not article:
+        #     # Could not load article (missing or invalid ID);
+        #     # skip to avoid KeyErrors later
+        #     continue
 
-        feedback_for_this_article = {}
+        # Feedback for this article
+        feedback_for_article = {}
         if doc and "feedback" in doc and article_uuid in doc["feedback"]:
-            feedback_for_this_article = doc["feedback"][article_uuid]
+            feedback_for_article = doc["feedback"][article_uuid]
 
-        recs_for_this_article = facade.get_recommendations(article_uuid)
-        total_recs = len(recs_for_this_article)
-        rated_count = len(feedback_for_this_article)
+        total_recs = 5 # Hard coded but should be a constant
+        rated_count = len(feedback_for_article)
 
         if rated_count == 0:
             state = "none"
@@ -58,27 +72,37 @@ def compute_progress(doc, predetermined_articles):
 
         progress_list.append({
             "uuid": article_uuid,
-            "title": article.title,
+            # "title": article.title,
             "progress": state
         })
 
-    # --- 2. Find the last rated (partial or full) article's index ---
+    # 3. Find the last rated (partial or full) article's index
     last_rated_index = -1
     for i, article_info in enumerate(progress_list):
         if article_info["progress"] in ["partial", "full"]:
             last_rated_index = i
 
-    # --- 3. Determine how many articles we want to return (subset) ---
+    # 4. Determine how many articles to return
     if last_rated_index == -1:
-        # No articles are rated yet, so just show the first 10 (or fewer if not enough articles)
+        # No articles are rated yet, so just show the first 10
         max_index = min(9, len(progress_list) - 1)
     else:
-        # Show up to last_rated_index + 10 (clamped to the array length)
+        # Show up to last_rated_index + 10
         max_index = min(last_rated_index + 10, len(progress_list) - 1)
 
-    # Slice the progress_list to keep only what we need to display
+    if article_id in predetermined_articles:
+        article_index = predetermined_articles.index(article_id)
+        if article_index > max_index:
+            # If the current article is beyond the max_index, set max_index to the current article index
+            max_index = article_index
+
+    # 5. Slice the progress_list to keep only what we need to display
     subset_to_display = progress_list[:max_index + 1]
-    return subset_to_display
+
+    end_time = time.time()  # End timing
+    print(f"compute_progress took {end_time - start_time:.4f} seconds")
+
+    return subset_to_display, article_index
 
 @app.before_request
 def assign_session_id():
@@ -109,9 +133,9 @@ def start_predetermined():
         articles = facade.testset_articles_df['uuid'].tolist()
         session_id = session.get('session_id')
         # Seed the random generator with a hash of the session_id
-        seed = hash(session_id)  # {{ edit_2 }}
-        random.Random(seed).shuffle(articles)  # {{ edit_3 }}
-        session['predetermined_articles'] = articles  # {{ edit_4 }}
+        seed = hash(session_id)
+        random.Random(seed).shuffle(articles)
+        session['predetermined_articles'] = articles
 
     predetermined_articles = session['predetermined_articles']
     first_article = predetermined_articles[0] if predetermined_articles else None
@@ -133,8 +157,8 @@ def article_recommendations(article_id):
     doc = mongo.db.feedback.find_one({"session_id": session.get('session_id')})
 
     # Pass predetermined_articles to the updated compute_progress
-    progress = compute_progress(doc, predetermined_articles)
-
+    progress, progress_index = compute_progress(doc, predetermined_articles, article_id)
+    print(f"Progress index: {progress_index}, type: {type(progress_index)}")
     return render_template(
         'article.html',
         article=result,
@@ -142,7 +166,8 @@ def article_recommendations(article_id):
         missed_articles=missed_articles,
         use_predetermined_flow=app.config['USE_PREDETERMINED_FLOW'],
         predetermined_articles=predetermined_articles,
-        progress=progress
+        progress=progress,
+        progress_index=progress_index,
     )
 
 @app.route('/recommendation/<string:article_id>/<string:recommendation_id>')
