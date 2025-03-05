@@ -175,6 +175,30 @@ def feedback():
 
     return jsonify({'status': 'success'}), 200
 
+@app.route('/store_company', methods=['POST'])
+def store_company():
+    data = request.get_json(silent=True) or {}
+    company = data.get('company', '').strip()
+
+    # Get or create session_id
+    session_id = session.get('session_id')
+    if not session_id:
+        session_id = str(uuid.uuid4())
+        session['session_id'] = session_id
+
+    # Upsert into the feedback collection
+    timestamp = datetime.now(timezone.utc).timestamp()
+    mongo.db.feedback.update_one(
+        {"session_id": session_id},
+        {
+            "$setOnInsert": {"session_id": session_id},
+            "$set": {"company": company, "company_timestamp": timestamp}
+        },
+        upsert=True
+    )
+
+    return jsonify({"status": "success", "company": company})
+
 @app.route('/sus', methods=['GET', 'POST'])
 def sus():
     if request.method == 'POST':
