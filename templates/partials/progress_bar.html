@@ -1,0 +1,60 @@
+{% macro render_progress_bar(articles) %}
+    {#
+        articles is expected to be a list of dicts, e.g.:
+        [
+            {
+                "uuid": "abc123",
+                "title": "Some Article",
+                "progress": "none"    # can be "none", "partial", "full"
+            },
+            ...
+        ]
+    #}
+
+    {# 1. Find the last article that is partially or fully rated #}
+    {% set last_rated_index = -1 %}
+    {% set i = 0 %}
+    {% for article in articles %}
+        {% if article.progress in ["partial", "full"] %}
+            {% set last_rated_index = i %}
+        {% endif %}
+        {% set i = i + 1 %}
+    {% endfor %}
+
+    {# 2. Determine how many articles you want to display.
+        For example, show up to last_rated_index + 10.
+        If no articles are rated, last_rated_index will remain -1,
+        so start from 0 anyway. #}
+    {% if last_rated_index == -1 %}
+        {% set max_index = 10 if articles|length > 10 else articles|length - 1 %}
+    {% else %}
+        {% set max_index = last_rated_index + 10 if (last_rated_index + 10) < articles|length else articles|length - 1 %}
+    {% endif %}
+
+    <div class="progress-bar-container">
+        <div class="progress-bar">
+            {# 3. Loop once more, but only render from 0 to max_index #}
+            {% set i = 0 %}
+            {% for article in articles %}
+                {% if i <= max_index %}
+                    {% set color = "grey" %}
+                    {% if article.progress == "partial" %}
+                        {% set color = "yellow" %}
+                    {% elif article.progress == "full" %}
+                        {% set color = "green" %}
+                    {% endif %}
+
+                    <a
+                        href="{{ url_for('article_recommendations', article_id=article.uuid) }}"
+                        class="progress-square"
+                        title="Article: {{ article.title }}"
+                        style="background-color: {{ color }};"
+                    >
+                        {{ i + 1 }}
+                    </a>
+                {% endif %}
+                {% set i = i + 1 %}
+            {% endfor %}
+        </div>
+    </div>
+{% endmacro %}

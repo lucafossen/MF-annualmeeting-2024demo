@@ -1,3 +1,5 @@
+{% from "partials/progress_bar.html" import render_progress_bar %}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -176,6 +178,7 @@
 </head>
 
 <body>
+    {{ render_progress_bar(progress) }}
     <!-- Scroll hint container -->
     <div id="scrollHint" class="scroll-hint">
         <span class="arrow">&#8675;</span>
