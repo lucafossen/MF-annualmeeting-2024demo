@@ -198,7 +198,22 @@
                 <li>Hvis du gir en lav score, er det til stor hjelp om du legger til en valgfri kommentar for å forklare!</li><br>
                 <li>Når du har minst <b>20</b> vurderinger, kan du gå videre til siste trinn (tar ca. 2 minutter) ved å klikke på "Gå til spørreskjema" knappen nederst. Men du må gjerne fortsette å vurdere artikler! Jo mer tilbakemelding vi får, jo bedre!</li><br>
             </ol>
-            <button onclick="hideOverlay()">Forstått</button>
+
+            <form id="companyForm">
+                <label for="companyInput"><b>Et raskt kontrollspørsmål: Hvilket selskap jobber du for?</b></label><br>
+                <input
+                    type="text"
+                    id="companyInput"
+                    name="company"
+                    placeholder="Skriv inn selskapets navn"
+                    style="width: 100%; max-width: 300px;"
+                    required
+                />
+                <br><br>
+                <button type="submit" id="overlaySubmitBtn">
+                    Forstått
+                </button>
+            </form>
         </div>
     </div>
     <div class="container">
@@ -369,6 +384,33 @@
             const susButton = document.getElementById('susButton');
             const submitAllButton = document.getElementById('submitAll');
             const ratingStatus = document.getElementById('ratingStatus');
+            const companyForm = document.getElementById('companyForm');
+
+            if (companyForm) {
+                companyForm.addEventListener('submit', function (event) {
+                    event.preventDefault(); // Prevent actual form submission
+                    const companyValue = document.getElementById('companyInput').value.trim();
+
+                    fetch('/store_company', {
+                        method: 'POST',
+                        headers: {
+                        'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ company: companyValue })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Company info saved:', data);
+                        // Once saved, hide the overlay and do not reload the page
+                        hideOverlay();
+                    })
+                    .catch(err => {
+                        console.error('Error storing company info:', err);
+                        // Even if error, you could choose to hide the overlay or not
+                        hideOverlay();
+                    });
+                });
+            }
 
             submitAllButton.addEventListener('click', function (event) {
                 event.preventDefault();
