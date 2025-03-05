@@ -34,7 +34,7 @@ body {
 
 /* Progress bar styles */
 .progress-bar-container {
-    padding: 10px;
+    padding-bottom: 10px;
     display: flex;
     justify-content: center;
 }

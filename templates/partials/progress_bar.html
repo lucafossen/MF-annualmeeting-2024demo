@@ -1,4 +1,5 @@
 {% macro render_progress_bar(articles) %}
+<p style="text-align: center;">Din oversikt:</p>
     <div class="progress-bar-container">
         <div class="progress-bar">
             {% for article in articles %}
@@ -15,7 +16,7 @@
                     title="{{ 'Partially rated:' if article.progress == 'partial' else 'Fully rated:' if article.progress == 'full' else 'Not rated:' }} {{ article.title }}"
                     style="background-color: {{ color }};"
                 >
-                    <!-- Optionally display an index or keep it empty -->
+                    <span style="color: #555555; display: flex; justify-content: center; align-items: center; height: 100%;">{{ loop.index }}</span>
                 </a>
             {% endfor %}
         </div>
