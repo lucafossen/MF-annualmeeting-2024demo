@@ -30,24 +30,22 @@ mongo.init_app(app)
 def compute_progress(doc, predetermined_articles):
     """
     Build a list of articles (in the order of predetermined_articles) with a 'progress' attribute:
-    'none', 'partial', or 'full', based on how many recommendations have been rated.
+    'none', 'partial', or 'full'.
+    Then return only the subset of articles up to the last partial/full plus 10 more.
     """
     progress_list = []
 
+    # --- 1. Determine the progress state for each article ---
     for article_uuid in predetermined_articles:
-        # Retrieve the article metadata from your facade:
         article = facade.get_article(article_uuid)
         if not article:
-            # If for some reason the facade can't find this article, skip
             continue
 
-        # Extract relevant info for the progress state
         feedback_for_this_article = {}
         if doc and "feedback" in doc and article_uuid in doc["feedback"]:
             feedback_for_this_article = doc["feedback"][article_uuid]
 
         recs_for_this_article = facade.get_recommendations(article_uuid)
-
         total_recs = len(recs_for_this_article)
         rated_count = len(feedback_for_this_article)
 
@@ -64,7 +62,23 @@ def compute_progress(doc, predetermined_articles):
             "progress": state
         })
 
-    return progress_list
+    # --- 2. Find the last rated (partial or full) article's index ---
+    last_rated_index = -1
+    for i, article_info in enumerate(progress_list):
+        if article_info["progress"] in ["partial", "full"]:
+            last_rated_index = i
+
+    # --- 3. Determine how many articles we want to return (subset) ---
+    if last_rated_index == -1:
+        # No articles are rated yet, so just show the first 10 (or fewer if not enough articles)
+        max_index = min(9, len(progress_list) - 1)
+    else:
+        # Show up to last_rated_index + 10 (clamped to the array length)
+        max_index = min(last_rated_index + 10, len(progress_list) - 1)
+
+    # Slice the progress_list to keep only what we need to display
+    subset_to_display = progress_list[:max_index + 1]
+    return subset_to_display
 
 @app.before_request
 def assign_session_id():
