@@ -225,8 +225,13 @@ button:active {
     margin: 5px;
 }
 
-.recommendation-content {
-    padding: 15px;
+.recommendation-title,
+.recommendation-age,
+.recommendation-lead-text {
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 10px;
 }
 
 .recommendation-title {
