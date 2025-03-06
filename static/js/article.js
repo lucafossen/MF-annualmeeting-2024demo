@@ -154,67 +154,74 @@ document.addEventListener('DOMContentLoaded', function () {
         })
         .catch(error => console.error('Error fetching user feedback:', error));
 
-    submitAllButton.addEventListener('click', function (event) {
-        event.preventDefault();
+    function submitAllFeedback() {
+        return new Promise((resolve, reject) => {
+            const recommendations = document.querySelectorAll('.recommendation-item');
+            let feedbackItems = [];
 
-        const recommendations = document.querySelectorAll('.recommendation-item');
-        let feedbackItems = [];
+            recommendations.forEach((recItem) => {
+                const ratingSelect = recItem.querySelector('.rating-input');
+                const commentField = recItem.querySelector('.feedback-comment');
 
-        recommendations.forEach((recItem) => {
-            const ratingSelect = recItem.querySelector('.rating-input');
-            const commentField = recItem.querySelector('.feedback-comment');
+                const articleId = ratingSelect.getAttribute('data-article-id');
+                const recId = ratingSelect.getAttribute('data-rec-id');
+                const ratingValue = ratingSelect.value;
+                const commentValue = commentField.value.trim();
 
-            const articleId = ratingSelect.getAttribute('data-article-id');
-            const recId = ratingSelect.getAttribute('data-rec-id');
-            const ratingValue = ratingSelect.value;
-            const commentValue = commentField.value.trim();
-
-            if (ratingValue) {
-                feedbackItems.push({
-                    article_id: articleId,
-                    recommendation_id: recId,
-                    rating: ratingValue,
-                    comment: commentValue,
-                    domElement: recItem
-                });
-            }
-        });
-
-        if (feedbackItems.length === 0) {
-            alert('Please select at least one rating before submitting.');
-            return;
-        }
-
-        feedbackItems.forEach((feedbackObj) => {
-            fetch('/feedback', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    article_id: feedbackObj.article_id,
-                    recommendation_id: feedbackObj.recommendation_id,
-                    rating: feedbackObj.rating,
-                    comment: feedbackObj.comment
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Feedback submitted:', data);
-                // Turn it green once successfully submitted
-                const section = feedbackObj.domElement.querySelector('.feedback-section');
-                if (section) {
-                    section.style.backgroundColor = 'green';
+                if (ratingValue) {
+                    feedbackItems.push({
+                        article_id: articleId,
+                        recommendation_id: recId,
+                        rating: ratingValue,
+                        comment: commentValue,
+                        domElement: recItem
+                    });
                 }
-                // Show a dropdown notification saying "Lagret!" for a short duration
-                showDropdownNotification('Lagret!', '#4c77ce', '#ffffff', 2000);
-                updateSusButton();
-            })
-            .catch((error) => {
-                console.error('Error:', error);
             });
+
+            // if (feedbackItems.length === 0) {
+            //     alert('Please select at least one rating before submitting.');
+            //     // We resolve anyway so navigation can continue
+            //     resolve();
+            //     return;
+            // }
+
+            // Submit each feedback via fetch, and wait for them all
+            let fetchPromises = feedbackItems.map((feedbackObj) => {
+                return fetch('/feedback', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        article_id: feedbackObj.article_id,
+                        recommendation_id: feedbackObj.recommendation_id,
+                        rating: feedbackObj.rating,
+                        comment: feedbackObj.comment
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Feedback submitted:', data);
+                    // Turn green once successfully submitted
+                    const section = feedbackObj.domElement.querySelector('.feedback-section');
+                    if (section) {
+                        section.style.backgroundColor = 'green';
+                    }
+                    // Optionally show a dropdown “Saved!” message
+                    showDropdownNotification('Lagret!', '#4c77ce', '#ffffff', 2000);
+                    updateSusButton();
+                })
+                .catch(error => console.error('Error:', error));
+            });
+
+            // Once all fetches are done, resolve
+            Promise.all(fetchPromises).then(() => resolve());
         });
-    });
+    }
+
+    // Expose it to window so predetermined.js can call it
+    window.submitAllFeedback = submitAllFeedback;
 
     function updateSusButton() {
         fetch('/get_rating_count')

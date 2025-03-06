@@ -42,18 +42,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Event listener for Previous
     prevButton.addEventListener('click', function () {
-        if (currentIndex > 0) {
-            var prevArticleId = predeterminedArticles[currentIndex - 1];
-            window.location.href = '/article/' + prevArticleId;
-        }
+        // 1) Submit feedback
+        submitAllFeedback().then(() => {
+            // 2) Now do the existing "go to previous" logic
+            if (currentIndex > 0) {
+                var prevArticleId = predeterminedArticles[currentIndex - 1];
+                window.location.href = '/article/' + prevArticleId;
+            }
+        });
     });
 
     // Event listener for Next
     nextButton.addEventListener('click', function () {
-        if (currentIndex >= 0 && currentIndex < predeterminedArticles.length - 1) {
-            var nextArticleId = predeterminedArticles[currentIndex + 1];
-            window.location.href = '/article/' + nextArticleId;
-        }
+        // 1) Submit feedback
+        submitAllFeedback().then(() => {
+            // 2) Now do the existing "go to next" logic
+            if (currentIndex >= 0 && currentIndex < predeterminedArticles.length - 1) {
+                var nextArticleId = predeterminedArticles[currentIndex + 1];
+                window.location.href = '/article/' + nextArticleId;
+            }
+        });
     });
 
 });
