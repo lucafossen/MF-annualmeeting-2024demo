@@ -206,6 +206,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (section) {
                     section.style.backgroundColor = 'green';
                 }
+                // Show a dropdown notification saying "Lagret!" for a short duration
+                showDropdownNotification('Lagret!', '#4c77ce', '#ffffff', 2000);
                 updateSusButton();
             })
             .catch((error) => {
@@ -221,8 +223,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 const count = data.count || 0;
                 if (count >= ratingThreshold) {
                     console.log('Rating threshold reached:', count);
-                    const fullMessage = `Tusen takk! Du har vurdert ${count} artikler. Fortsett gjerne å vurdere, eller gå videre til spørreskjemaet.`;
-                    showDropdownNotification(fullMessage, '#00b613', '#000000', 7000);
 
                     ratingStatus.innerText = `Tusen takk! Du har vurdert ${count} artikler. Fortsett gjerne å vurdere, eller gå videre til spørreskjemaet.`;
                     susButton.disabled = false;
