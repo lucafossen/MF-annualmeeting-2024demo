@@ -4,8 +4,63 @@
         <meta charset="UTF-8">
         <title>System Usability Scale questionnaire</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <style>
+            /* Overlay styling similar to article.html */
+            #susInstructionsOverlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: none; /* hidden by default */
+                background-color: rgba(0, 0, 0, 0.7);
+                z-index: 9999;
+            }
+            .overlay-content {
+                background-color: #fff;
+                width: 80%;
+                max-width: 600px;
+                margin: 10% auto;
+                padding: 20px;
+                border-radius: 8px;
+                text-align: left;
+            }
+            .overlay-content button {
+                display: inline-block;
+                margin-top: 20px;
+                background-color: #0077cc;
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                border: none;
+                cursor: pointer;
+            }
+            .overlay-content button:hover {
+                background-color: #005fa3;
+            }
+        </style>
     </head>
 <body>
+
+<!-- Overlay for explaining SUS (similar to the instructions overlay in article.html) -->
+<div id="susInstructionsOverlay">
+    <div class="overlay-content">
+        <h2>Velkommen til System Usability Scale (SUS)</h2>
+        <p>
+            SUS er et anerkjent spørreskjema for å måle brukervennligheten av et system.
+            <br><br>
+            Du vil få 10 korte spørsmål om din opplevelse av å bruke nettsiden.
+            Hvert spørsmål besvares på en skala fra 1 til 5 (1 - Ikke enig i det hele tatt, 5 - Helt enig).
+            <br><br>
+            Dine svar hjelper oss med å skille mellom mangler i anbefalingene og mangler i brukergrensesnittet.
+        </p>
+        <p>
+            Takk for at du har tatt deg tiden i dag — dette er svært nyttig for oss!
+        </p>
+        <button onclick="hideSUSOverlay()">Forstått</button>
+    </div>
+</div>
+
 <h1>System Usability Scale Undersøkelse</h1>
 <p>Vennligst svar på følgende spørsmål om din opplevelse med å bruke systemet vårt.</p>
 
@@ -53,6 +108,11 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Show overlay on the first visit, storing a separate key so it doesn't conflict with article.html
+    if (!localStorage.getItem('shownOverlaySUS')) {
+        document.getElementById('susInstructionsOverlay').style.display = 'block';
+    }
+
     // Load any saved values from localStorage
     if (localStorage.getItem('susFormData')) {
         const savedData = JSON.parse(localStorage.getItem('susFormData'));
@@ -86,6 +146,12 @@ document.addEventListener('DOMContentLoaded', function() {
         element.addEventListener('change', saveFormData);
     });
 });
+
+// Hide the SUS overlay and set localStorage to prevent re-showing on subsequent visits
+function hideSUSOverlay() {
+    document.getElementById('susInstructionsOverlay').style.display = 'none';
+    localStorage.setItem('shownOverlaySUS', 'true');
+}
 
 function saveFormData() {
     // Gather form data in an object
