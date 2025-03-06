@@ -269,8 +269,8 @@
                     {% for rec in recommendations %}
                     <li class="recommendation-item normal-recommendation">
                         <a href="https://tv2.no/a/{{ rec.uuid }}" target="_blank">
-                            <img src="{{ rec.image_url or 'https://via.placeholder.com/150' }}" alt="No image">
                             <div class="recommendation-content">
+                            <img src="{{ rec.image_url or 'https://via.placeholder.com/150' }}" alt="No image">
                                 <span class="recommendation-title">{{ rec.title }}</span>
                                 <!-- Should show "days since", "x days older" or somehitng like that -->
                             </div>
