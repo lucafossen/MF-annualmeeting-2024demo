@@ -54,6 +54,55 @@ document.addEventListener('DOMContentLoaded', function () {
     const ratingStatus = document.getElementById('ratingStatus');
     const companyForm = document.getElementById('companyForm');
 
+    // 1. On page load, populate each recommendation’s input values from localStorage
+    function loadRecommendationsFromLocalStorage() {
+        const recommendations = document.querySelectorAll('.recommendation-item');
+        recommendations.forEach((recItem) => {
+            const ratingSelect = recItem.querySelector('.rating-input');
+            const commentField = recItem.querySelector('.feedback-comment');
+
+            // We'll build a key based on IDs
+            const articleId = ratingSelect.getAttribute('data-article-id');
+            const recId = ratingSelect.getAttribute('data-rec-id');
+            const storageKey = `feedback_${articleId}_${recId}`;
+
+            // Retrieve data from localStorage
+            const storedData = localStorage.getItem(storageKey);
+            if (storedData) {
+                const { rating, comment } = JSON.parse(storedData);
+                if (rating) ratingSelect.value = rating;
+                if (comment) commentField.value = comment;
+            }
+        });
+    }
+
+    // 2. Whenever the user changes a rating or comment, store in localStorage
+    function attachInputListeners() {
+        const recommendations = document.querySelectorAll('.recommendation-item');
+        recommendations.forEach((recItem) => {
+            const ratingSelect = recItem.querySelector('.rating-input');
+            const commentField = recItem.querySelector('.feedback-comment');
+
+            const articleId = ratingSelect.getAttribute('data-article-id');
+            const recId = ratingSelect.getAttribute('data-rec-id');
+            const storageKey = `feedback_${articleId}_${recId}`;
+
+            // Listen for change on the rating dropdown
+            ratingSelect.addEventListener('change', () => {
+                saveToLocalStorage(storageKey, ratingSelect.value, commentField.value);
+            });
+
+            // Listen for input changes in the comment box
+            commentField.addEventListener('input', () => {
+                saveToLocalStorage(storageKey, ratingSelect.value, commentField.value);
+            });
+        });
+    }
+
+    function saveToLocalStorage(storageKey, rating, comment) {
+        localStorage.setItem(storageKey, JSON.stringify({ rating, comment }));
+    }
+
     if (companyForm) {
         companyForm.addEventListener('submit', function (event) {
             event.preventDefault(); // Prevent actual form submission
@@ -80,12 +129,36 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    fetch('/get_user_feedback')
+        .then(response => response.json())
+        .then(feedbackData => {
+            const recommendations = document.querySelectorAll('.recommendation-item');
+
+            recommendations.forEach((recItem) => {
+                const ratingSelect = recItem.querySelector('.rating-input');
+                const articleId = ratingSelect.getAttribute('data-article-id');
+                const recId = ratingSelect.getAttribute('data-rec-id');
+
+                // If there's an existing rating for articleId->recId, turn green
+                if (
+                    feedbackData[articleId] &&
+                    feedbackData[articleId][recId] &&
+                    feedbackData[articleId][recId].rating
+                ) {
+                    const feedbackSection = recItem.querySelector('.feedback-section');
+                    if (feedbackSection) {
+                        feedbackSection.style.backgroundColor = 'green';
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error fetching user feedback:', error));
+
     submitAllButton.addEventListener('click', function (event) {
         event.preventDefault();
 
-        // Gather all feedback
         const recommendations = document.querySelectorAll('.recommendation-item');
-        let feedbackData = [];
+        let feedbackItems = [];
 
         recommendations.forEach((recItem) => {
             const ratingSelect = recItem.querySelector('.rating-input');
@@ -96,52 +169,49 @@ document.addEventListener('DOMContentLoaded', function () {
             const ratingValue = ratingSelect.value;
             const commentValue = commentField.value.trim();
 
-            // Check if user selected a rating
             if (ratingValue) {
-                feedbackData.push({
+                feedbackItems.push({
                     article_id: articleId,
                     recommendation_id: recId,
                     rating: ratingValue,
-                    comment: commentValue
+                    comment: commentValue,
+                    domElement: recItem
                 });
             }
         });
 
-        if (feedbackData.length === 0) {
+        if (feedbackItems.length === 0) {
             alert('Please select at least one rating before submitting.');
             return;
         }
 
-        // Send all feedback in a single batch of fetch calls
-        feedbackData.forEach((feedback) => {
+        feedbackItems.forEach((feedbackObj) => {
             fetch('/feedback', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(feedback)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Feedback submitted:', data);
-                    updateSusButton();
+                body: JSON.stringify({
+                    article_id: feedbackObj.article_id,
+                    recommendation_id: feedbackObj.recommendation_id,
+                    rating: feedbackObj.rating,
+                    comment: feedbackObj.comment
                 })
-                .catch((error) => {
-                    console.error('Error:', error);
-                });
-        });
-
-        // Reset the fields
-            recommendations.forEach((recItem) => {
-                const ratingSelect = recItem.querySelector('.rating-input');
-                const commentField = recItem.querySelector('.feedback-comment');
-
-                // Only reset if a rating was selected
-                if (ratingSelect.value) {
-                    ratingSelect.value = '';
-                    commentField.value = '';
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Feedback submitted:', data);
+                // Turn it green once successfully submitted
+                const section = feedbackObj.domElement.querySelector('.feedback-section');
+                if (section) {
+                    section.style.backgroundColor = 'green';
                 }
+                updateSusButton();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
             });
+        });
     });
 
     function updateSusButton() {
@@ -149,10 +219,8 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 const count = data.count || 0;
-
                 if (count >= ratingThreshold) {
                     console.log('Rating threshold reached:', count);
-
                     const fullMessage = `Tusen takk! Du har vurdert ${count} artikler. Fortsett gjerne å vurdere, eller gå videre til spørreskjemaet.`;
                     showDropdownNotification(fullMessage, '#00b613', '#000000', 7000);
 
@@ -160,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     susButton.disabled = false;
                     susButton.style.backgroundColor = '#00b613';
                     susButton.style.cursor = 'pointer';
-                    susButton.innerText = `Gå videre til spørreskjemaet`;
+                    susButton.innerText = 'Gå videre til spørreskjemaet';
                     susButton.addEventListener('click', () => {
                         window.location.href = '/sus';
                     });
@@ -173,6 +241,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('Kan ikke hente vurderingstelling:', error);
             });
     }
+
+
+    // Call your new localStorage functions
+    loadRecommendationsFromLocalStorage();
+    attachInputListeners();
 
     // Initial call to update the SUS button on page load
     updateSusButton();
