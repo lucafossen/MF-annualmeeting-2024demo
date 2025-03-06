@@ -5,6 +5,11 @@
         <title>System Usability Scale questionnaire</title>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
         <style>
+            #susForm {
+                max-width: 90%;
+                margin: 0 auto;
+                padding: 20px;
+            }
             /* Overlay styling similar to article.html */
             #susInstructionsOverlay {
                 position: fixed;
@@ -61,9 +66,17 @@
     </div>
 </div>
 
-<h1>System Usability Scale Undersøkelse</h1>
-<p>Vennligst svar på følgende spørsmål om din opplevelse med å bruke systemet vårt.</p>
-
+<div style="margin-left: 5%;">
+<button
+type="button"
+class="btn"
+onclick="window.history.back()"
+style="margin-left: 0px;">
+Tilbake
+</button>
+    <h1>System Usability Scale Undersøkelse</h1>
+    <p>Vennligst svar på følgende spørsmål om din opplevelse med å bruke systemet vårt.</p>
+</div>
 <form action="{{ url_for('sus') }}" method="post" id="susForm">
     <div class="question-section">
         <!-- Age Question -->
@@ -102,22 +115,23 @@
                 {% include 'partials/sus_question_template.html' %}
             {% endwith %}
         {% endfor %}
+        <!-- Free-text section for additional feedback -->
+        <div class="question" style="text-align: center;">
+            <br>
+            <label for="additional_feedback"><b>Har du andre tilbakemeldinger?</b></label>
+            <br>
+            <textarea
+                id="additional_feedback"
+                name="additional_feedback"
+                rows="4"
+                cols="50"
+                placeholder="Skriv ned dine generelle tilbakemeldinger her..."
+            ></textarea>
+        </div>
+        <button type="submit" class="btn">Send inn</button>
     </div>
 
-    <!-- Free-text section for additional feedback -->
-    <div class="question" style="text-align: center;">
-        <label for="additional_feedback"><b>Har du andre tilbakemeldinger?</b></label>
-        <br>
-        <textarea
-            id="additional_feedback"
-            name="additional_feedback"
-            rows="4"
-            cols="50"
-            placeholder="Skriv ned dine generelle tilbakemeldinger her..."
-        ></textarea>
-    </div>
 
-    <button type="submit" class="btn">Send inn</button>
 </form>
 
 <script>

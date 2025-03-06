@@ -223,8 +223,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const count = data.count || 0;
                 if (count >= ratingThreshold) {
                     console.log('Rating threshold reached:', count);
-
-                    ratingStatus.innerText = `Tusen takk! Du har vurdert ${count} artikler. Fortsett gjerne å vurdere, eller gå videre til spørreskjemaet.`;
+                    ratingStatus.innerHTML = `Tusen takk! Du har vurdert <b>${count}</b> artikler. Fortsett gjerne å vurdere, eller gå videre til spørreskjemaet.`;
                     susButton.disabled = false;
                     susButton.style.backgroundColor = '#00b613';
                     susButton.style.cursor = 'pointer';
