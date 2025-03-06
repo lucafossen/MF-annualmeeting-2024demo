@@ -9,7 +9,7 @@
 <h1>System Usability Scale Undersøkelse</h1>
 <p>Vennligst svar på følgende spørsmål om din opplevelse med å bruke systemet vårt.</p>
 
-<form action="{{ url_for('sus') }}" method="post">
+<form action="{{ url_for('sus') }}" method="post" id="susForm">
     <div class="question-section">
         <!-- Age Question -->
         <div class="question">
@@ -50,5 +50,61 @@
     </div>
     <button type="submit" class="btn">Send inn</button>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load any saved values from localStorage
+    if (localStorage.getItem('susFormData')) {
+        const savedData = JSON.parse(localStorage.getItem('susFormData'));
+
+        // Restore age
+        if (savedData.age) {
+            document.getElementById('age').value = savedData.age;
+        }
+
+        // Restore gender
+        if (savedData.gender) {
+            document.getElementById('gender').value = savedData.gender;
+        }
+
+        // Restore SUS question answers
+        for (let i = 1; i <= 10; i++) {
+            const savedAnswer = savedData['sus_question' + i];
+            if (savedAnswer) {
+                // Check the corresponding radio
+                const radioToCheck = document.querySelector(`input[name="sus_question${i}"][value="${savedAnswer}"]`);
+                if (radioToCheck) {
+                    radioToCheck.checked = true;
+                }
+            }
+        }
+    }
+
+    // Listen for changes in the form
+    const formElements = document.querySelectorAll('#susForm input, #susForm select');
+    formElements.forEach(element => {
+        element.addEventListener('change', saveFormData);
+    });
+});
+
+function saveFormData() {
+    // Gather form data in an object
+    const formData = {
+        age: document.getElementById('age').value,
+        gender: document.getElementById('gender').value
+    };
+
+    // Add each question's chosen radio button value
+    for (let i = 1; i <= 10; i++) {
+        const chosenOption = document.querySelector(`input[name="sus_question${i}"]:checked`);
+        formData['sus_question' + i] = chosenOption ? chosenOption.value : null;
+    }
+
+    // Save to localStorage
+    localStorage.setItem('susFormData', JSON.stringify(formData));
+}
+</script>
+
 </body>
+<CURRENT_CURSOR_POSITION>
 </html>
