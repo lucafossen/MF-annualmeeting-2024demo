@@ -230,6 +230,14 @@ def store_company():
 
     return jsonify({"status": "success", "company": company})
 
+@app.route('/get_user_feedback', methods=['GET'])
+def get_user_feedback():
+    session_id = session.get('session_id')
+    doc = mongo.db.feedback.find_one({"session_id": session_id}) or {}
+    # We only need to return the part under "feedback" if it exists
+    feedback_data = doc.get('feedback', {})
+    return jsonify(feedback_data)
+
 @app.route('/sus', methods=['GET', 'POST'])
 def sus():
     if request.method == 'POST':
