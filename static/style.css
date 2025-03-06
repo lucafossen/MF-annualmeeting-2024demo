@@ -63,6 +63,45 @@ body {
    green  = #4caf50
 */
 
+.dropdown-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%); /* Centers the notification horizontally */
+    z-index: 1001;
+    padding: 10px;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    animation: slideDown 0.5s ease-out;
+    overflow: hidden;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0; /* Start with opacity 0 for a fade-in effect */
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+}
+
+.slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+}
+
 /* Main Article */
 .main-article-item {
     position: relative;
