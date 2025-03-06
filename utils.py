@@ -195,8 +195,8 @@ class ArticleRecommendationFacade:
                         humanize.i18n.activate("nb_NO") # For some reason this doesn't work when called right after importing
                         delta = rec_creation_date - original_creation_date
                         recommendation_age = humanize.naturaldelta(delta.to_pytimedelta())
-                    print(f"Recommendation age: {recommendation_age}")
-                    print("*"*50)
+                    # print(f"Recommendation age: {recommendation_age}")
+                    # print("*"*50)
                     # Create the Article object as before
                     article_object = Article(
                     uuid=article_data.get('uuid', rec_article_id),
