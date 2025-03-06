@@ -251,6 +251,9 @@ def sus():
             sus_key = f"sus_question{i}"
             sus_responses[sus_key] = request.form.get(sus_key)
 
+        # Gather additional free-text feedback, if present
+        additional_feedback = request.form.get('additional_feedback')
+
         # Prepare data to store
         session_id = session.get('session_id')
         timestamp = datetime.now(timezone.utc).timestamp()
@@ -261,7 +264,8 @@ def sus():
                 "timestamp": timestamp,
                 "age": age,
                 "gender": gender,
-                "sus_responses": sus_responses
+                "sus_responses": sus_responses,
+                "additional_feedback": additional_feedback
             }
         }
 

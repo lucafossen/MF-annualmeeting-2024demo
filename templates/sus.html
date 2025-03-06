@@ -103,6 +103,20 @@
             {% endwith %}
         {% endfor %}
     </div>
+
+    <!-- Free-text section for additional feedback -->
+    <div class="question" style="text-align: center;">
+        <label for="additional_feedback"><b>Har du andre tilbakemeldinger?</b></label>
+        <br>
+        <textarea
+            id="additional_feedback"
+            name="additional_feedback"
+            rows="4"
+            cols="50"
+            placeholder="Skriv ned dine generelle tilbakemeldinger her..."
+        ></textarea>
+    </div>
+
     <button type="submit" class="btn">Send inn</button>
 </form>
 
@@ -138,10 +152,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
+
+        // Restore additional feedback if present
+        if (savedData.additional_feedback) {
+            document.getElementById('additional_feedback').value = savedData.additional_feedback;
+        }
     }
 
     // Listen for changes in the form
-    const formElements = document.querySelectorAll('#susForm input, #susForm select');
+    const formElements = document.querySelectorAll('#susForm input, #susForm select, #susForm textarea');
     formElements.forEach(element => {
         element.addEventListener('change', saveFormData);
     });
@@ -165,6 +184,9 @@ function saveFormData() {
         const chosenOption = document.querySelector(`input[name="sus_question${i}"]:checked`);
         formData['sus_question' + i] = chosenOption ? chosenOption.value : null;
     }
+
+    // Add the additional free-text feedback
+    formData.additional_feedback = document.getElementById('additional_feedback').value;
 
     // Save to localStorage
     localStorage.setItem('susFormData', JSON.stringify(formData));
