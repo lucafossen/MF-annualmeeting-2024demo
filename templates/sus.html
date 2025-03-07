@@ -97,8 +97,14 @@ Tilbake
                 <option value="prefer_not_to_say">Foretrekker å ikke si</option>
             </select>
         </div>
-        <hr>
 
+        <!-- Experience question -->
+        <div class="question">
+            <label for="experience"><b>År med journalisterfaring:</b></label>
+            <input type="number" id="age" name="age" min="0" required>
+        </div>
+
+        <hr>
         <!-- SUS Questions -->
         {% for q_num, q_text in [
             (1, 'Jeg tror at jeg ville likt å bruke dette systemet ofte.'),
