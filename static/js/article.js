@@ -236,7 +236,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     susButton.style.cursor = 'pointer';
                     susButton.innerText = 'Gå videre til spørreskjemaet';
                     susButton.addEventListener('click', () => {
-                        window.location.href = '/sus';
+                        submitAllFeedback().then(() => {
+                            window.location.href = '/sus';
+                        });
                     });
                 } else {
                     ratingStatus.innerText = `Vennligst vurder ${ratingThreshold - count} flere anbefalinger for å låse opp spørreskjemaet`;
