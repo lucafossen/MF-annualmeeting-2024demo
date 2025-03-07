@@ -8,6 +8,11 @@
                 <br>
                 <br>
                 <span>{{ value }}</span>
+                {% if value == 1 %}
+                    <span style="font-size: 0.9em; display: block;">Helt uenig</span>
+                {% elif value == 5 %}
+                    <span style="font-size: 0.9em; display: block;">Helt enig</span>
+                {% endif %}
             </label>
         {% endfor %}
     </div>
