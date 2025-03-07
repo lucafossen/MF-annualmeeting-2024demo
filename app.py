@@ -244,6 +244,7 @@ def sus():
         # Collect demographic info
         age = request.form.get('age')
         gender = request.form.get('gender')
+        experience = request.form.get('experience')
 
         # Gather all SUS responses
         sus_responses = {}
@@ -264,6 +265,7 @@ def sus():
                 "timestamp": timestamp,
                 "age": age,
                 "gender": gender,
+                "experience": experience,
                 "sus_responses": sus_responses,
                 "additional_feedback": additional_feedback
             }
