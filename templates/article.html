@@ -53,25 +53,29 @@
     <div class="container">
         <div class="header">
             <a href="/" class="no-underline-link">
-                <img src="https://mediafutures.no/wp-content/uploads/tv2_scaled.png" alt="TV 2 Logo" class="tv2-logo">
-                <h1>LLMs as Journalists</h1>
+                <!-- <img src="https://mediafutures.no/wp-content/uploads/tv2_scaled.png" alt="TV 2 Logo" class="tv2-logo"> -->
+                <h1>LLMs for Journalists</h1>
                 <p>Tool for journalists and editors - Helping them find related articles to their story</p>
             </a>
         </div>
         <h2>Main article:</h2>
 
-        <div class="main-article-item">
-            <a href="https://tv2.no/a/{{ article.uuid }}" class="external-link-button">Visit original article on TV 2</a>
-            <div class="main-article-content">
-                <h1 class="main-article-title">{{ article.title }}</h1>
-                <p class="article-byline">{{ article.byline | join(', ') }}</p>
-                <p class="article-metadata">Published on {{ article.creation_date }} in {{ article.section }}</p>
-                <img src="{{ article.image_url or 'https://via.placeholder.com/150' }}" alt="{{ article.title }}">
-                <p class="article-lead-text">{{ article.lead_text }}</p>
-                <div class="article-full-text">
-                    <!-- Just showing the first 400 chars for now -->
-                    {{ article.body_text[:400]+"..." | safe }} <a href="https://tv2.no/a/{{ article.uuid }}"
-                        target="_blank">Read more (opens in new tab)</a>
+        <div class="main-article-item" style="display: flex; align-items: flex-start;">
+            <img src="{{ article.image_url or 'https://via.placeholder.com/150' }}" alt="{{ article.title }}">
+            <div class="main-article-content" >
+                <div>
+                    <a href="https://tv2.no/a/{{ article.uuid }}" target="_blank">
+                        <h1 class="main-article-title">{{ article.title }}</h1>
+                    </a>
+                    <br>
+                    <p class="article-byline">{{ article.byline | join(', ') }}</p>
+                    <p class="article-metadata">Published on {{ article.creation_date }} in {{ article.section }}</p>
+                    <p class="article-lead-text">{{ article.lead_text }}</p>
+                    <div class="article-full-text">
+                        <!-- Just showing the first 400 chars for now -->
+                        {{ article.body_text[:400]+"..." | safe }} <a href="https://tv2.no/a/{{ article.uuid }}"
+                            target="_blank">Les mer (åpnes i ny fane)</a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -138,12 +142,6 @@
         </div>
         <a href="{{ url_for('home') }}" class="back-link">Back to Home</a>
         <!-- Add the toggle button here -->
-        <div class="toggle-container">
-            <label for="toggle-visibility" class="toggle-label">
-                <input type="checkbox" id="toggle-visibility" checked>
-                <span class="toggle-button">Show original editor selection</span>
-            </label>
-        </div>
     </div>
 
     <script>
@@ -231,38 +229,24 @@
                 }
             }
 
-            // Reference to the toggle checkbox
-            const toggleVisibility = document.getElementById('toggle-visibility');
+            // Always show the original editor selection
             const mainContent = document.getElementById('main-content');
             const colorExplainer = document.getElementById('color-explainer');
             const missedArticlesSection = document.querySelector('.missed-articles-section');
 
-            // Function to update visibility based on toggle state
-            function updateVisibility() {
-                if (toggleVisibility.checked) {
-                    // Hide coloring
-                    mainContent.classList.add('no-coloring');
-                    // Hide missed articles section
-                    missedArticlesSection.classList.add('hidden');
-                    // Hide color explainer
-                    colorExplainer.style.display = 'none';
-                } else {
-                    // Show coloring
-                    mainContent.classList.remove('no-coloring');
-                    // Show missed articles section
-                    missedArticlesSection.classList.remove('hidden');
-                    // Show color explainer
-                    colorExplainer.style.display = 'block';
-                }
+            // Function to ensure visibility is always on
+            function ensureVisibility() {
+                // Show coloring
+                mainContent.classList.remove('no-coloring');
+                // Show missed articles section
+                missedArticlesSection.classList.remove('hidden');
+                // Show color explainer
+                colorExplainer.style.display = 'block';
             }
 
             // Initialize visibility on page load
-            updateVisibility();
+            ensureVisibility();
 
-            // Add event listener for toggle changes
-            toggleVisibility.addEventListener('change', function () {
-                updateVisibility();
-            });
         });
     </script>
 

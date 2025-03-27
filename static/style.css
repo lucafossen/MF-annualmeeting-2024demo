@@ -7,6 +7,17 @@ body {
     padding: 0;
 }
 
+button {
+    border: none;
+    background-color: #0077cc;
+    color: #fff;
+    transition: background-color;
+}
+
+button:active {
+    background-color: rgb(0, 77, 93);
+}
+
 .container {
     max-width: 1200px;
     margin: 40px auto;
@@ -30,6 +41,76 @@ body {
 .header p {
     font-size: 18px;
     color: #666;
+}
+
+/* Progress bar styles */
+.progress-bar-container {
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: center;
+}
+
+.progress-bar {
+    display: flex;
+    flex-wrap: wrap; /* let the squares wrap to a new line if we have many */
+    /* gap: 2px;        spacing between squares */
+}
+.progress-square {
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+    border: 1px solid rgb(146, 131, 158);
+    line-height: 20px;
+    text-align: center;
+    color: #000; /* text color */
+    text-decoration: none;
+    /* border-radius: 4px; */
+    font-size: 12px;
+    /* font-weight: bold; */
+}
+/* Color references:
+   grey   = #ccc
+   yellow = #ffeb3b
+   green  = #4caf50
+*/
+
+.dropdown-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%); /* Centers the notification horizontally */
+    z-index: 1001;
+    padding: 10px;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    animation: slideDown 0.5s ease-out;
+    overflow: hidden;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0; /* Start with opacity 0 for a fade-in effect */
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+}
+
+.slide-up {
+    animation: slideUp 0.5s ease-out forwards;
 }
 
 /* Main Article */
@@ -77,8 +158,21 @@ body {
 }
 
 .main-article-item img {
-    width: 50%;
-    height: auto;
+    height: 100%;
+    aspect-ratio: 1.5 / 1;
+    object-fit: cover;
+    object-position: 0% 0%;
+}
+
+.btn {
+    display: block;
+    margin: 0 auto;
+    padding: 10px 20px;
+    background-color: #0077cc;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 20px;
 }
 
 /* Recommendations */
@@ -92,7 +186,7 @@ body {
 
 .small-articles {
     display: flex;
-    overflow-x: auto;
+    flex-wrap: wrap;
     gap: 20px;
     list-style-type: none;
     padding: 0;
@@ -100,36 +194,35 @@ body {
 }
 
 .recommendation-item {
-    flex: 0 0 auto;
-    width: 300px;
+    /* flex: 0 0 calc(25% - 20px) will give you four items per row */
+    flex: 0 0 calc(20% - 20px);
+    box-sizing: border-box;
     background-color: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
+    margin-bottom: 20px;
 }
 
 .recommendation-item img {
     width: 100%;
-    height: auto;
+    aspect-ratio: 1.5 / 1;
+    object-fit: cover;
 }
 
 .missed-item {
-    flex: 0 0 auto;
-    /* width: 200px; */
     background-color: #ffccc9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    padding: 5px;
-    margin: 5px;
 }
 
-.recommendation-content {
-    padding: 15px;
+.recommendation-title,
+.recommendation-age,
+.recommendation-lead-text {
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 10px;
 }
 
 .recommendation-title {
@@ -138,6 +231,12 @@ body {
     color: #333;
     font-weight: bold;
     margin: 0;
+}
+
+.recommendation-age {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 10px;
 }
 
 .recommendation-title:hover {
@@ -229,7 +328,7 @@ body {
 
 .article-link {
     font-size: 18px;
-    color: #0077cc;
+    /* color: #0077cc; */
     text-decoration: none;
 }
 
@@ -263,6 +362,7 @@ body {
 /* Feedback Buttons */
 .feedback-buttons {
     margin-top: 10px;
+    margin-bottom: 5px;
 }
 
 .like-button,
@@ -283,4 +383,80 @@ body {
 .dislike-button.active {
     background-color: #d9534f; /* Red for dislike */
     color: white;
+}
+
+
+/* Questionnaire Styles */
+
+.question-section {
+    background-color: #f5f5f5; /* Light grey background */
+    padding: 20px; /* Add some padding */
+    margin-bottom: 20px; /* Space between sections */
+    border-radius: 8px; /* Rounded corners */
+    border: 1px solid #ddd; /* Light border */
+}
+
+.question-section h3 {
+    color: #333; /* Darker color for headings */
+    margin-bottom: 10px; /* Space below headings */
+}
+
+.question-section form {
+    display: flex;
+    flex-direction: column;
+}
+
+.question-section form button {
+    align-self: flex-start; /* Align button to the start */
+    margin-top: 10px; /* Space above button */
+}
+
+
+.question {
+    margin-bottom: 15px;
+}
+
+.question p {
+    margin-bottom: 5px;
+}
+
+.question .label {
+    display: block;
+    margin-bottom: 5px;
+    padding-top: 5px;
+    font-style: italic;
+    /* font-size: small; */
+    color: #444444;
+}
+
+.large-radio {
+    transform: scale(1.66);
+    margin: 0 auto; /* Center the radio buttons within their label */
+}
+
+/* Ensure the question-scale-grid has equal-width cells */
+.question-scale-grid {
+    display: grid;
+    grid-template-rows: auto auto; /* Two rows: one for radio buttons, one for labels */
+    gap: 10px;
+    text-align: center;
+    width: 100%; /* Ensure the grid takes the full available width */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+/* Radio Buttons Row */
+.question .question-scale-grid label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sus-question {
+    display: flex;
+    margin-bottom: 15px;
+}
+
+.large-radio {
+    transform: scale(1.66);
+    margin: 0 auto; /* Center the radio buttons within their label */
 }
