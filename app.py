@@ -6,7 +6,7 @@ import uuid
 facade = ArticleRecommendationFacade('data/combined_articles_recommendations.csv', 'data/articles_big_dataset.csv')
 
 app = Flask(__name__)
-app.secret_key = '***REMOVED***'
+app.secret_key = 'secretsecret123654'
 
 @app.before_request
 def assign_session_id():
