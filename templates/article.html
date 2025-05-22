@@ -8,6 +8,7 @@
     <title>Spørreskjema: {{ article.title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <!-- <link rel="stylesheet" href="{{ url_for('static', filename='tv2style.css') }}"> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/overlay.css') }}">
     <style>
         .hidden {
             display: none;
@@ -98,38 +99,7 @@
             margin-right: 8px;
         }
         /* Overlay styling */
-        #instructionsOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none; /* hidden by default */
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 9999;
-        }
-        .overlay-content {
-            background-color: #fff;
-            width: 80%;
-            max-width: 1000px;
-            margin: 10% auto;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: left;
-        }
-        .overlay-content button {
-            display: inline-block;
-            margin-top: 20px;
-            background-color: #0077cc;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-        }
-        .overlay-content button:hover {
-            background-color: #005fa3;
-        }
+        /* Moved to static/css/overlay.css */
 
         /* Container for the help icon and tooltip */
         #help-icon-container {
@@ -188,7 +158,7 @@
     </div>
     <!-- Overlay (hidden on subsequent visits) -->
     <div id="instructionsOverlay">
-        <div class="overlay-content">
+        <div class="overlay-content overlay-content-article">
             <h2>Velkommen!</h2>
             <i>Forventet tid: 10-15 minutter</i>
             <p>Vi er forskere fra MediaFutures, og vi prøver ut nye måter å måle hvor relevante artikler er til hverandre.<br><b>Målet er at journalister og redaktører skal få bedre automatiske anbefalinger når de lager "Relatert"-seksjonen av en nyhetssak.</b><br>Ditt innspill vil gi oss verdifull tilbakemelding på kvaliteten av disse anbefalingene!</p>

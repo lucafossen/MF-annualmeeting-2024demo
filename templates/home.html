@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Article Recommendations Home</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/overlay.css') }}">
     <style>
         /* Add some basic styling for the buttons */
         .filter-buttons {
@@ -40,44 +41,13 @@
         }
 
         /* Overlay styling */
-        #instructionsOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none; /* hidden by default */
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 9999;
-        }
-        .overlay-content {
-            background-color: #fff;
-            width: 80%;
-            max-width: 600px;
-            margin: 10% auto;
-            padding: 20px;
-            border-radius: 8px;
-            text-align: left;
-        }
-        .overlay-content button {
-            display: inline-block;
-            margin-top: 20px;
-            background-color: #0077cc;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-        }
-        .overlay-content button:hover {
-            background-color: #005fa3;
-        }
+        /* Moved to static/css/overlay.css */
     </style>
 </head>
 <body>
     <!-- Overlay (hidden on subsequent visits) -->
     <div id="instructionsOverlay">
-        <div class="overlay-content">
+        <div class="overlay-content overlay-content-home">
             <h2>Welcome!</h2>
             <p>We are researchers from MediaFutures, and are trying out a new method of recommending <b>related articles</b> for journalists and editors. You'll be using this survey to provide feedback on the quality of these recommendations</p>
             <p>
